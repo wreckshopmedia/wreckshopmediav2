@@ -2,35 +2,58 @@
 USE AS THEME FILE!
 ------------------ */
 
+/* --------- IMPORT THEME FONTS (WIP) --------- */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@300;400;500;600;700&family=Outfit:wght@100..900&display=swap");
+
 :root {
-  --color-gradient-top: #dfedf6;
-  --color-gradient-bottom: #fbf8ef;
-  --color-text: #2b2b2b;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --asset-shadow: 1px 2px 10px 1px #00000020;
+  /* --------------------------------------------------- */
+  /* --------------------------------------------------- */
+  /* ------ VARS N' CRAP, BOOOOOOOOOOOIIIIIIIIIII ------ */
+  /* --------------------------------------------------- */
+  /* --------------------------------------------------- */
 
-  --heading: system-ui, "Segoe UI", Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* theme colors rough wip */
+  
+  /* LIGHT VARS + THEIR RICH VERSION FOR LOGO HOVER - WIP!*/
+  --light-green: #DAEBC4;
+  --rich-light-green: #d1e5b6;
+  --light-blue: #8DACC2;
+  --rich-light-blue: #65a0ca;
+  --light-brown: #A77E58;
+  --rich-light-brown: #956d47;
+  --green: #A9C08C;
+  --rich-green: #9ebf76;
+  --light-tan: #F2EEDE;
+  --rich-light-tan: #f8f5ed;
+  --light-white: #FBF8EF;
+  --rich-light-white: #f7f6f0;
 
-  font: 18px/145% var(--sans);
+  
+  /* COLORS W/O RICH, ALWAYS SAME  */
+  
+  --stroke-black: #22181C;
+
+  /* use of those colors and other things  */
+
+  --color-gradient-top: #d6efff;
+  --color-gradient-bottom: #fbf0d6;
+  --color-text-title: #4e3e39;
+  --color-text-body: #050505;
+
+  --heading: "Cormorant SC", serif;
+  --body: "Outfit", sans-serif;
+
   color-scheme: light dark;
-  color: var(--color-text);
-  background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  background: linear-gradient(var(--color-gradient-top), var(--color-gradient-bottom));
 }
+
+/* --------------------------------------------------- */
+/* ------- REF STUFF THAT I'LL DO/DELETE LATER ------- */
+/* --------------------------------------------------- */
 
 /* @media (prefers-color-scheme: dark) {
   :root {
@@ -45,14 +68,10 @@ USE AS THEME FILE!
     --social-bg: rgba(47, 48, 58, 0.5);
     --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
 } */
 
 #root {
-  width: 1126px;
+  /* width: 1126px; */
   max-width: 100%;
   margin: 0 auto;
   text-align: center;
@@ -62,6 +81,8 @@ USE AS THEME FILE!
   align-items: center;
   flex-direction: column;
   box-sizing: border-box;
+  /* container-type here so cqi units work everywhere downstream */
+  container-type: inline-size;
 }
 
 body {
@@ -72,37 +93,26 @@ h1,
 h2,
 h3 {
   font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+  color: var(--color-text-title);
+  letter-spacing: 0.2em;
+  margin: 0;
 }
 
 h1 {
-  font-size: clamp(1.5rem, 5cqi, 2.5rem);
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 400;
 }
+
 h2 {
   font-size: 24px;
   line-height: 118%;
   letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+p {
+  margin: 0;
+  font-family: var(--body);
+  font-size: 1rem;
+  font-weight: 300;
 }

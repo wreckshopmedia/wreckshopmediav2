@@ -1,0 +1,23 @@
+.siteLayout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  container-type: inline-size;
+  width: min(97cqi, 950px);
+}
+
+/* constrains Logo's cqi units to the same context as the landing button */
+.logoWrapper {
+  container-type: inline-size;
+  width: min(90cqi, 300px);
+  display: flex;
+  justify-content: center;
+}
+
+
+.main {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

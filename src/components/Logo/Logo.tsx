@@ -1,13 +1,55 @@
-import styles from "./logo.module.css";
+import { useEffect, useRef } from 'react'
+import { motion, useAnimation } from 'motion/react'
+import { useReducedMotion } from '../../context/ReducedMotionContext'
+import styles from './logo.module.css'
 
-export function Logo() {
+interface LogoProps {
+  onReady?: () => void
+  isRevealing?: boolean
+  /** when true, hill starts already flat - used on all non-landing routes */
+  hillFlat?: boolean
+}
+
+/**
+ * @description Wreck Shop SVG logo. When isRevealing is true, the hill flattens upward
+ * into a wide horizontal line. Pass hillFlat to render it pre-flattened (non-landing routes).
+ * @author Chris "Mo" Mochinski
+ */
+export function Logo({ onReady, isRevealing = false, hillFlat = false }: LogoProps) {
+  const { animationsEnabled } = useReducedMotion()
+  const hillControls = useAnimation()
+
+  // capture onReady in a ref so the mount effect doesn't re-fire when Landing re-renders
+  const onReadyRef = useRef(onReady)
+  // no load animation - fire ready once on mount only
+  useEffect(() => {
+    onReadyRef.current?.()
+  }, [])
+
+  // flatten the hill upward when the landing button is clicked
+  useEffect(() => {
+    if (isRevealing && animationsEnabled) {
+      void hillControls.start({
+        scaleY: 0.2,
+        scaleX: 6.5,
+        strokeWidth: 20,
+        transition: {
+          scaleY: { duration: 0.35, ease: 'easeIn' },
+          scaleX: { duration: 0.6, delay: 0.2, ease: 'easeOut' },
+          strokeWidth: { duration: 0.35, ease: 'easeIn' },
+        },
+      })
+    }
+  }, [isRevealing, animationsEnabled, hillControls])
+
   return (
     <svg
       id="logo-svg"
       className={styles.logo}
       viewBox="0 0 395 626"
       fill="none"
-      xmlns="http://www.w3.org/2000/svg">
+      xmlns="http://www.w3.org/2000/svg"
+      overflow="visible">
       <g id="TREE IDEA">
         <g id="BOAT">
           <g id="Ellipse 235">
@@ -111,6 +153,7 @@ export function Logo() {
               <path
                 d="M228.076 294.448C190.253 290.282 132.274 282.132 127.785 281.499C127.587 281.471 127.443 281.367 127.33 281.203L94.2218 233.375L90.0189 227.303C89.6604 226.786 90.0541 226.083 90.6759 226.184C102.208 228.052 173.001 239.447 219.999 245.271C267.024 251.097 336.76 259.633 344.586 260.59C344.994 260.64 345.246 261.018 345.171 261.422C345.003 262.319 344.689 263.965 344.275 266.007C343.391 270.369 342.049 276.54 340.69 281.1C338.261 289.25 333.179 300.974 332.11 303.41C331.988 303.687 331.75 303.851 331.449 303.827C325.653 303.37 266.535 298.684 228.076 294.448Z"
                 fill="#FBF8EF"
+                className={styles.boatLightWhiteFill}
               />
               <path
                 d="M94.2218 233.375L90.0189 227.303C89.6604 226.786 90.0541 226.083 90.6759 226.184C102.208 228.052 173.001 239.447 219.999 245.271C267.024 251.097 336.76 259.633 344.586 260.59C344.994 260.64 345.246 261.018 345.171 261.422C345.003 262.319 344.689 263.965 344.275 266.007C343.391 270.369 342.049 276.54 340.69 281.1C338.261 289.25 333.179 300.974 332.11 303.41C331.988 303.687 331.75 303.851 331.449 303.827C325.653 303.37 266.535 298.684 228.076 294.448C190.253 290.282 132.274 282.132 127.785 281.499C127.587 281.471 127.443 281.367 127.33 281.203L94.2218 233.375ZM344.275 266.007C344.275 266.007 266.409 258.779 217.723 252.432C168.735 246.045 143.067 240.782 94.2218 233.375"
@@ -137,10 +180,12 @@ export function Logo() {
               <path
                 d="M125.22 301.133C126.054 314.159 110.053 354.153 80.6893 352.909C53.4998 351.758 32.874 334.489 37.5048 313.917C41.4239 296.507 60.0299 289.295 80.6938 287.39C99.0786 285.695 124.386 288.107 125.22 301.133Z"
                 fill="#DAEBC4"
+                className={styles.treeGreenFill}
               />
               <path
                 d="M386.368 379.858C387.202 392.885 374.617 403.342 350.858 404.449C327.099 405.556 301.162 396.893 300.328 383.867C299.494 370.84 316.141 354.016 339.901 352.909C363.66 351.803 385.534 366.832 386.368 379.858Z"
                 fill="#DAEBC4"
+                className={styles.treeGreenFill}
               />
               <path
                 d="M125.22 301.133C126.054 314.159 110.053 354.153 80.6893 352.909C53.4998 351.758 32.874 334.489 37.5048 313.917C41.4239 296.507 60.0299 289.295 80.6938 287.39C99.0786 285.695 124.386 288.107 125.22 301.133Z"
@@ -159,6 +204,7 @@ export function Logo() {
               id="Ellipse 225"
               d="M174.977 271.516C186.457 271.516 196.814 273.919 204.272 277.769C211.77 281.638 216.144 286.851 216.144 292.4C216.144 297.95 211.77 303.163 204.272 307.032C196.814 310.882 186.457 313.285 174.977 313.285C163.496 313.285 153.139 310.882 145.68 307.032C138.182 303.163 133.809 297.95 133.809 292.4C133.809 286.851 138.182 281.638 145.68 277.769C153.139 273.919 163.496 271.516 174.977 271.516Z"
               fill="#DAEBC4"
+              className={styles.treeGreenFill}
               stroke="#22181C"
               strokeWidth="1.5"
             />
@@ -166,6 +212,7 @@ export function Logo() {
               id="Ellipse 228"
               d="M301.245 373.846C312.19 370.995 323.115 371.354 331.917 374.201C340.725 377.049 347.326 382.354 349.834 389.361C352.343 396.368 350.342 403.913 344.902 410.472C339.466 417.028 330.639 422.531 319.695 425.381C308.75 428.232 297.824 427.874 289.022 425.027C280.215 422.178 273.614 416.874 271.106 409.867C268.597 402.86 270.598 395.315 276.037 388.756C281.473 382.2 290.301 376.697 301.245 373.846Z"
               fill="#DAEBC4"
+              className={styles.treeGreenFill}
               stroke="#22181C"
               strokeWidth="1.5"
             />
@@ -173,6 +220,7 @@ export function Logo() {
               id="Ellipse 209"
               d="M64.1367 376.01C72.4353 371.923 81.2621 370.226 88.8009 370.754C96.3504 371.283 102.491 374.026 105.659 378.706C108.827 383.387 108.541 389.294 105.303 395.135C102.07 400.968 95.9335 406.639 87.6349 410.726C79.3363 414.813 70.5095 416.51 62.9707 415.982C55.4214 415.453 49.2802 412.711 46.1122 408.031C42.9441 403.351 43.2305 397.443 46.4682 391.601C49.7015 385.769 55.8382 380.097 64.1367 376.01Z"
               fill="#DAEBC4"
+              className={styles.treeGreenFill}
               stroke="#22181C"
               strokeWidth="1.5"
             />
@@ -180,6 +228,7 @@ export function Logo() {
               id="Ellipse 221"
               d="M244.466 388.692C254.084 387.98 263.045 390.129 269.754 394.141C276.464 398.153 280.87 403.99 281.55 410.671C282.23 417.351 279.069 423.748 273.27 428.687C267.472 433.625 259.079 437.059 249.46 437.771C239.842 438.483 230.88 436.334 224.171 432.322C217.461 428.31 213.056 422.473 212.376 415.793C211.696 409.112 214.856 402.715 220.655 397.776C226.453 392.838 234.847 389.404 244.466 388.692Z"
               fill="#DAEBC4"
+              className={styles.treeGreenFill}
               stroke="#22181C"
               strokeWidth="1.5"
             />
@@ -190,6 +239,7 @@ export function Logo() {
               <path
                 d="M152.769 289.698C153.932 301.121 136.985 310.739 118.037 312.142C99.0896 313.545 82.787 305.422 81.6245 293.999C80.4619 282.576 94.8798 272.179 113.828 270.776C132.775 269.373 151.607 278.275 152.769 289.698Z"
                 fill="#DAEBC4"
+                className={styles.treeGreenFill}
                 stroke="#22181C"
                 strokeWidth="3"
                 mask="url(#path-16-inside-6_1945_48)"
@@ -199,6 +249,7 @@ export function Logo() {
               id="Ellipse 213"
               d="M315.337 302.194C328.089 299.081 340.552 299.114 350.377 301.648C360.228 304.188 367.253 309.186 369.499 315.879C371.744 322.571 368.881 329.982 362.096 336.583C355.33 343.166 344.774 348.817 332.022 351.929C319.27 355.042 306.807 355.009 296.983 352.475C287.131 349.935 280.106 344.938 277.861 338.245C275.615 331.553 278.478 324.142 285.263 317.54C292.029 310.957 302.585 305.306 315.337 302.194Z"
               fill="#DAEBC4"
+              className={styles.treeGreenFill}
               stroke="#22181C"
               strokeWidth="1.5"
             />
@@ -209,6 +260,7 @@ export function Logo() {
               <path
                 d="M326.695 292.341C333.546 308.902 310.667 324.538 291.296 325.668C271.925 326.799 255.349 316.839 254.273 303.423C253.197 290.007 269.901 279.274 287.4 277.085C304.082 274.997 321.084 278.779 326.695 292.341Z"
                 fill="#DAEBC4"
+                className={styles.treeGreenFill}
                 stroke="#22181C"
                 strokeWidth="3"
                 mask="url(#path-18-inside-7_1945_48)"
@@ -221,6 +273,7 @@ export function Logo() {
               <path
                 d="M273.081 299.239C279.933 315.801 257.054 331.436 237.683 332.567C218.312 333.697 201.736 323.738 200.66 310.321C199.584 296.905 216.288 286.172 233.786 283.983C250.468 281.896 267.471 285.677 273.081 299.239Z"
                 fill="#DAEBC4"
+                className={styles.treeGreenFill}
                 stroke="#22181C"
                 strokeWidth="3"
                 mask="url(#path-19-inside-8_1945_48)"
@@ -230,6 +283,7 @@ export function Logo() {
               id="Ellipse 208"
               d="M49.168 320.188C60.598 320.188 70.9166 323.626 78.3604 329.148C85.8041 334.671 90.3348 342.242 90.335 350.537C90.335 358.833 85.8043 366.404 78.3604 371.927C70.9166 377.449 60.598 380.888 49.168 380.888C37.7377 380.888 27.4184 377.449 19.9746 371.927C12.5307 366.404 8 358.833 8 350.537C8.00017 342.242 12.5308 334.671 19.9746 329.148C27.4184 323.626 37.7377 320.188 49.168 320.188Z"
               fill="#DAEBC4"
+              className={styles.treeGreenFill}
               stroke="#22181C"
               strokeWidth="1.5"
             />
@@ -237,6 +291,7 @@ export function Logo() {
               id="Ellipse 214"
               d="M353.653 326.506C361.032 328.378 367.135 332.227 371.046 336.901C374.957 341.575 376.642 347.021 375.339 352.158C374.036 357.295 369.959 361.281 364.292 363.525C358.626 365.769 351.427 366.244 344.047 364.372C336.667 362.5 330.565 358.651 326.654 353.977C322.742 349.303 321.058 343.856 322.361 338.719C323.664 333.582 327.741 329.597 333.408 327.353C339.073 325.109 346.273 324.634 353.653 326.506Z"
               fill="#DAEBC4"
+              className={styles.treeGreenFill}
               stroke="#22181C"
               strokeWidth="1.5"
             />
@@ -244,6 +299,7 @@ export function Logo() {
               id="Ellipse 227"
               d="M189.797 371.57C201.235 371.57 211.558 374.861 219.003 380.145C226.449 385.429 230.964 392.661 230.964 400.568C230.964 408.476 226.449 415.707 219.003 420.991C211.558 426.274 201.235 429.566 189.797 429.566C178.359 429.566 168.034 426.274 160.59 420.991C153.144 415.707 148.629 408.476 148.629 400.568C148.629 392.661 153.144 385.429 160.59 380.145C168.034 374.861 178.359 371.57 189.797 371.57Z"
               fill="#DAEBC4"
+              className={styles.treeGreenFill}
               stroke="#22181C"
               strokeWidth="1.5"
             />
@@ -251,6 +307,7 @@ export function Logo() {
               id="Ellipse 220"
               d="M138.414 379.684C149.866 379.684 160.2 382.68 167.647 387.484C175.103 392.294 179.581 398.85 179.581 405.978C179.581 413.105 175.102 419.66 167.647 424.47C160.2 429.274 149.866 432.27 138.414 432.271C126.961 432.271 116.627 429.274 109.18 424.47C101.725 419.66 97.2463 413.105 97.2461 405.978C97.2461 398.85 101.725 392.294 109.18 387.484C116.627 382.68 126.961 379.684 138.414 379.684Z"
               fill="#DAEBC4"
+              className={styles.treeGreenFill}
               stroke="#22181C"
               strokeWidth="1.5"
             />
@@ -258,6 +315,7 @@ export function Logo() {
               id="OVER-TREE"
               d="M340.118 346.533C399.614 397.919 265.975 423.609 195.855 423.609C125.734 423.609 68.8906 391.038 68.8906 350.861C68.8906 310.683 79.708 273.463 191.939 303.215C304.169 332.966 379.331 301.911 340.118 346.533Z"
               fill="#DAEBC4"
+              className={styles.treeGreenFill}
             />
           </g>
           <g id="trunk">
@@ -275,6 +333,7 @@ export function Logo() {
             <path
               d="M215.416 358.088C215.413 358.204 214.589 388.903 214.402 426.513C220.518 424.033 227.402 420.903 233.359 417.335C251.428 406.513 263.285 379.9 269.551 384.513C278.644 391.209 256.961 409.87 244.702 422.699C236.587 431.191 223.707 438.324 214.36 442.81C214.384 479.895 215.176 520.188 217.994 543.476C219.584 550.51 198.219 553.657 196.449 544.429C193.814 517.942 194.834 474.021 196.639 435.093C186.968 429.396 171.49 419.542 165.288 411.478C157.978 401.972 146.135 384.616 151.28 379.187C155.692 374.531 166.541 397.669 176.676 407.287C182.847 413.143 191.177 419.503 197.186 423.888C199.148 385.532 201.633 354.586 201.633 354.586L215.416 358.088Z"
               fill="#A77E58"
+              className={styles.treeLightBrownFill}
             />
             <path
               d="M215.416 358.088C215.413 358.204 214.589 388.903 214.402 426.513C220.518 424.033 227.402 420.903 233.359 417.335C251.428 406.513 263.285 379.9 269.551 384.513C278.644 391.209 256.961 409.87 244.702 422.699C236.587 431.191 223.707 438.324 214.36 442.81C214.384 479.895 215.176 520.188 217.994 543.476C219.584 550.51 198.219 553.657 196.449 544.429C193.814 517.942 194.834 474.021 196.639 435.093C186.968 429.396 171.49 419.542 165.288 411.478C157.978 401.972 146.135 384.616 151.28 379.187C155.692 374.531 166.541 397.669 176.676 407.287C182.847 413.143 191.177 419.503 197.186 423.888C199.148 385.532 201.633 354.586 201.633 354.586L215.416 358.088Z"
@@ -289,6 +348,7 @@ export function Logo() {
                 id="Ellipse 234"
                 d="M272.376 358.436C282.25 357.897 291.308 360.19 297.969 364.295C304.633 368.403 308.837 374.277 309.2 380.911C309.563 387.546 306.023 393.843 299.847 398.652C293.673 403.459 284.919 406.726 275.045 407.266C265.172 407.805 256.114 405.512 249.453 401.407C242.789 397.299 238.585 391.425 238.222 384.791C237.859 378.156 241.399 371.859 247.575 367.05C253.749 362.243 262.503 358.976 272.376 358.436Z"
                 fill="#DAEBC4"
+                className={styles.treeGreenFill}
                 stroke="#22181C"
                 strokeWidth="1.5"
               />
@@ -296,6 +356,7 @@ export function Logo() {
                 id="Ellipse 231"
                 d="M141.918 339.794C157.641 329.533 178.466 333.656 188.445 348.946C198.424 364.237 193.813 384.96 178.09 395.221C162.367 405.482 141.54 401.359 131.561 386.068C121.583 370.777 126.195 350.054 141.918 339.794Z"
                 fill="#DAEBC4"
+                className={styles.treeGreenFill}
                 stroke="#22181C"
                 strokeWidth="1.5"
               />
@@ -303,6 +364,7 @@ export function Logo() {
                 id="Ellipse 230"
                 d="M130.133 338.108C144.938 337.299 157.434 347.68 158.171 361.16C158.908 374.64 147.617 386.321 132.812 387.131C118.007 387.94 105.511 377.558 104.774 364.079C104.037 350.599 115.328 338.917 130.133 338.108Z"
                 fill="#DAEBC4"
+                className={styles.treeGreenFill}
                 stroke="#22181C"
                 strokeWidth="1.5"
               />
@@ -310,6 +372,7 @@ export function Logo() {
                 id="Ellipse 232"
                 d="M215.273 336.93C238.188 335.677 257.373 350.177 258.404 369.032C259.434 387.886 241.944 404.391 219.029 405.644C196.114 406.896 176.929 392.396 175.898 373.541C174.868 354.687 192.358 338.182 215.273 336.93Z"
                 fill="#DAEBC4"
+                className={styles.treeGreenFill}
                 stroke="#22181C"
                 strokeWidth="1.5"
               />
@@ -318,23 +381,22 @@ export function Logo() {
               id="Ellipse 230_2"
               d="M308.228 351.134C308.228 414.092 246.326 341.026 215.997 368.418C187.884 393.81 162.192 368.418 140.546 373.388C119.018 378.329 108.646 365.732 97.7502 351.137C87.38 337.246 151.183 311.953 210.327 310.777C269.47 309.602 383.125 271.592 308.228 351.134Z"
               fill="#DAEBC4"
+              className={styles.treeGreenFill}
             />
           </g>
         </g>
-        <g id="HILL">
-          <g id="Vector">
-            <mask id="path-31-inside-10_1945_48" fill="white">
-              <path d="M395 625.035C395 582.015 317.815 530.391 202.037 530.391C86.2586 530.391 14 584.166 14 625.035H395Z" />
-            </mask>
-            <path
-              d="M395 625.035C395 582.015 317.815 530.391 202.037 530.391C86.2586 530.391 14 584.166 14 625.035H395Z"
-              fill="url(#paint7_linear_1945_48)"
-              stroke="url(#paint8_linear_1945_48)"
-              strokeWidth="3"
-              mask="url(#path-31-inside-10_1945_48)"
-            />
-          </g>
-        </g>
+        <motion.g
+          id="Hill"
+          animate={hillControls}
+          initial={hillFlat ? { scaleY: 0.2, scaleX: 6.5, strokeWidth: 20 } : { strokeWidth: 3 }}
+          style={{ transformBox: 'fill-box', originX: '50%', originY: '20%' }}
+        >
+          <path
+            d="M395 625.035C395 582.015 317.815 530.391 202.037 530.391C86.2586 530.391 14 584.166 14 625.035H395Z"
+            fill="url(#paint7_linear_1945_48)"
+            stroke="url(#paint8_linear_1945_48)"
+          />
+        </motion.g>
       </g>
       <defs>
         <linearGradient
@@ -344,8 +406,8 @@ export function Logo() {
           x2="239.232"
           y2="256.502"
           gradientUnits="userSpaceOnUse">
-          <stop stopColor="#A77E58" />
-          <stop offset="1" stopColor="#A77E58" />
+          <stop stopColor="#A77E58" className={styles.treeLightBrownFill} />
+          <stop offset="1" stopColor="#A77E58" className={styles.treeLightBrownFill} />
         </linearGradient>
         <linearGradient
           id="paint1_linear_1945_48"
@@ -354,8 +416,8 @@ export function Logo() {
           x2="173.097"
           y2="238.671"
           gradientUnits="userSpaceOnUse">
-          <stop stopColor="#FBF8EF" />
-          <stop offset="1" stopColor="#A77E58" />
+          <stop stopColor="#FBF8EF" className={styles.boatLightWhiteFill} />
+          <stop offset="1" stopColor="#A77E58" className={styles.treeLightBrownFill} />
         </linearGradient>
         <linearGradient
           id="paint2_linear_1945_48"
@@ -364,7 +426,7 @@ export function Logo() {
           x2="289.563"
           y2="159.127"
           gradientUnits="userSpaceOnUse">
-          <stop offset="0.389847" stopColor="#F2EEDE" />
+          <stop offset="0.389847" stopColor="#F2EEDE" className={styles.sailLightTanFill} />
           <stop offset="1" stopColor="#8C8981" />
         </linearGradient>
         <linearGradient
@@ -374,7 +436,7 @@ export function Logo() {
           x2="219.084"
           y2="184.332"
           gradientUnits="userSpaceOnUse">
-          <stop offset="0.544266" stopColor="#F6EFDE" />
+          <stop offset="0.544266" stopColor="#F2EEDE" className={styles.sailLightTanFill} />
           <stop offset="0.820588" stopColor="#908C82" />
         </linearGradient>
         <linearGradient
@@ -384,7 +446,7 @@ export function Logo() {
           x2="193.573"
           y2="253.986"
           gradientUnits="userSpaceOnUse">
-          <stop stopColor="#FBF8EF" />
+          <stop stopColor="#FBF8EF" className={styles.boatLightWhiteFill} />
           <stop offset="1" stopColor="#95938E" />
         </linearGradient>
         <linearGradient
@@ -394,7 +456,7 @@ export function Logo() {
           x2="194.179"
           y2="248.379"
           gradientUnits="userSpaceOnUse">
-          <stop stopColor="#A4C491" />
+          <stop stopColor="#A4C491" className={styles.boatWindowGreenFill} />
           <stop offset="1" stopColor="#355834" />
         </linearGradient>
         <linearGradient
@@ -404,7 +466,7 @@ export function Logo() {
           x2="212.888"
           y2="296.856"
           gradientUnits="userSpaceOnUse">
-          <stop stopColor="#8DACC2" />
+          <stop stopColor="#8DACC2" className={styles.boatLightBlueFill} />
           <stop offset="0.561685" stopColor="#26547C" />
         </linearGradient>
         <linearGradient
@@ -414,8 +476,8 @@ export function Logo() {
           x2="204"
           y2="564.352"
           gradientUnits="userSpaceOnUse">
-          <stop stopColor="#A9C08C" stopOpacity="0" />
-          <stop offset="1" stopColor="#A9C08C" />
+          <stop stopColor="#A9C08C" stopOpacity="0" className={styles.hillGreenFill} />
+          <stop offset="1" stopColor="#A9C08C" className={styles.hillGreenFill} />
         </linearGradient>
         <linearGradient
           id="paint8_linear_1945_48"

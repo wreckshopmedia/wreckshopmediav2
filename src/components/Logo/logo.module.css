@@ -4,5 +4,39 @@ INITIAL MODULE - logo.module.css
 
 .logo {
   /* TESTING STUFF */
-  max-width: 200px;
+  max-width: clamp(150px, 40cqi, 200px);
 }
+
+.treeGreenFill {
+    fill: var(--light-green);
+}
+
+.boatLightBlueFill {
+    fill: var(--light-blue);
+    stop-color: var(--light-blue);
+}
+
+.treeLightBrownFill {
+    fill: var(--light-brown);
+    stop-color: var(--light-brown);
+}
+
+.hillGreenFill {
+    fill: var(--green);
+    stop-color: var(--green);
+}
+
+.boatWindowGreenFill {
+    fill: var(--green);
+    stop-color: var(--green);
+}
+
+.sailLightTanFill {
+    fill: var(--light-tan);
+    stop-color: var(--light-tan);
+}
+
+.boatLightWhiteFill {
+    fill: var(--light-white);
+    stop-color: var(--light-white);
+}   

@@ -1,0 +1,37 @@
+/* landing outer wrapper - wide enough to house the full title row + line */
+
+.landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  container-type: inline-size;
+  width: min(97cqi, 950px);
+}
+
+/* button wraps only the logo */
+
+.landingButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  container-type: inline-size;
+  width: min(90cqi, 300px);
+
+  &:disabled {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  &:hover {
+    --light-green: var(--rich-light-green);
+    --light-brown: var(--rich-light-brown);
+    --light-blue: var(--rich-light-blue);
+    --green: var(--rich-green);
+    --light-tan: var(--rich-light-tan);
+    --light-white: var(--rich-light-white);
+  }
+}

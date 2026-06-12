@@ -32,14 +32,18 @@
 
 .routeLink {
   font-family: var(--heading);
-  font-size: clamp(13px, 1.6cqi, 15px);
+  font-size: clamp(13px, 1.7cqi, 16px);
   letter-spacing: 0.15em;
   text-decoration: none;
   color: var(--color-text-title);
-  text-transform: uppercase;
   white-space: nowrap;
 
   &:hover {
     opacity: 0.6;
+  }
+
+  &.activeLink {
+    cursor: default;
+    pointer-events: none;
   }
 }

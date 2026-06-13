@@ -1,0 +1,184 @@
+/*
+  the canvas is a single capped region centered in the viewport. it's
+  click-through (pointer-events: none) so empty space doesn't block the nav -
+  only the notes, pad, and trash catch the pointer. notes can be dragged anywhere
+  within it, freely overlapping other elements.
+*/
+.canvas {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: min(100vw, 1400px);
+  height: min(800px, 100dvh);
+  pointer-events: none;
+  z-index: 40;
+}
+
+/* a placed rant note - container-type lets the text scale with note size via cqi */
+.note {
+  container-type: inline-size;
+  position: absolute;
+  width: clamp(110px, 15vw, 165px);
+  aspect-ratio: 1;
+  padding: 1em 0.9em;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 2px;
+  cursor: grab;
+  will-change: transform;
+  pointer-events: auto;
+  /* offset shadow sells the lift off the canvas */
+  box-shadow:
+    0 1px 1px color(from var(--stroke-black) srgb r g b / 0.12),
+    0 6px 14px color(from var(--stroke-black) srgb r g b / 0.18);
+}
+
+.noteText {
+  font-family: var(--handwriting);
+  /* font-size is set inline per rant length - see noteFontSize() */
+  line-height: 1.45em;
+  color: var(--color-text-title);
+  margin: 0;
+  overflow: hidden;
+  text-align: left;
+}
+
+.noteAuthor {
+  font-family: var(--body);
+  font-size: max(6cqi, 9px);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: color(from var(--color-text-title) srgb r g b / 0.7);
+  align-self: flex-end;
+  margin-top: 0.4em;
+}
+
+/* the pad in the bottom-right corner - peel a blank from here. tilted like a
+   real pad tossed on a desk. */
+.pad {
+  position: absolute;
+  right: 1.2em;
+  bottom: 1.2em;
+  width: clamp(150px, 20vw, 210px);
+  aspect-ratio: 1;
+  rotate: -3deg;
+  z-index: 30;
+  pointer-events: auto;
+}
+
+/* stacked blanks behind the compose note give the illusion of a thick pad */
+.padBack {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: color(from var(--form-surface) srgb r g b / 0.9);
+  box-shadow: 0 2px 6px color(from var(--stroke-black) srgb r g b / 0.15);
+}
+
+.composeNote {
+  container-type: inline-size;
+  position: absolute;
+  inset: 0;
+  padding: 1em 0.9em;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  border-radius: 2px;
+  background: #fff8d6;
+  box-shadow:
+    0 1px 1px color(from var(--stroke-black) srgb r g b / 0.12),
+    0 8px 18px color(from var(--stroke-black) srgb r g b / 0.22);
+}
+
+/* borderless so writing feels like scribbling straight on the paper. typed text
+   is handwriting; the placeholder is smaller --body so it reads as instruction. */
+.composeTextarea {
+  flex: 1;
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: var(--handwriting);
+  font-size: max(8cqi, 12px);
+  line-height: 1.5em;
+  color: var(--color-text-title);
+  box-sizing: border-box;
+
+  &::placeholder {
+    font-family: var(--body);
+    font-size: max(5cqi, 11px);
+    font-weight: 300;
+    opacity: 0.5;
+  }
+}
+
+.composeFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4em;
+}
+
+.composeName {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--handwriting);
+  font-size: max(6cqi, 11px);
+  color: color(from var(--color-text-title) srgb r g b / 0.75);
+
+  &::placeholder {
+    font-family: var(--body);
+    font-size: max(4.5cqi, 10px);
+    font-weight: 300;
+    opacity: 0.5;
+  }
+}
+
+.stickButton {
+  flex-shrink: 0;
+  padding: 0.3em 0.7em;
+  font-family: var(--body);
+  font-size: max(5cqi, 9px);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  color: var(--color-text-title);
+  background: color(from var(--color-text-title) srgb r g b / 0.08);
+  border: 1px solid color(from var(--color-text-title) srgb r g b / 0.3);
+  border-radius: 3px;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: color(from var(--color-text-title) srgb r g b / 0.16);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+/* trash target - bottom-left so it's clear of the pad. notes dropped here vanish */
+.trash {
+  position: absolute;
+  left: 1.2em;
+  bottom: 1.2em;
+  width: 2.4em;
+  height: 2.4em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4em;
+  border-radius: 50%;
+  background: color(from var(--form-surface) srgb r g b / 0.55);
+  border: 1px dashed color(from var(--color-text-title) srgb r g b / 0.35);
+  z-index: 20;
+  pointer-events: auto;
+}

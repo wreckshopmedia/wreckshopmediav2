@@ -1,13 +1,13 @@
-import { useState, useEffect, useCallback } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import clsx from "clsx";
+import { useState } from "react";
+import { motion, useMotionValue, useTransform, animate } from "motion/react";
+import type { PanInfo } from "motion/react";
 import type { Rant } from "../../hooks/useRants";
 import styles from "./rantCard.module.css";
 
-const CYCLE_MS = 7000;
+const THROW_VELOCITY = 500; // px/s - below this the card springs back
+const STACK_SIZE = 3;
 
-// each card gets a "mood" gradient cycling through the site palette
-const POSTER_GRADIENTS = [
+const GRADIENTS = [
   "linear-gradient(158deg, #d6efff 0%, #253c78 100%)",
   "linear-gradient(158deg, #a6bba0 0%, #fbf0d6 100%)",
   "linear-gradient(158deg, #daebc4 0%, #253c78 100%)",
@@ -16,14 +16,7 @@ const POSTER_GRADIENTS = [
   "linear-gradient(158deg, #253c78 0%, #daebc4 100%)",
 ] as const;
 
-// dir=1 advances forward (new card flips in from right), dir=-1 retreats
-const cardVariants = {
-  enter: (dir: number) => ({ rotateY: dir * 90, opacity: 0, scale: 0.94 }),
-  center: { rotateY: 0, opacity: 1, scale: 1 },
-  exit: (dir: number) => ({ rotateY: dir * -90, opacity: 0, scale: 0.94 }),
-};
-
-/** @description Format ISO to a short date without the time component. */
+/** @description Format ISO date to short readable string. */
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
     month: "short",
@@ -32,114 +25,115 @@ function formatDate(iso: string): string {
   });
 }
 
+// same rant id + depth always produces the same peeking rotation
+function stackRotation(id: string, depth: number): number {
+  const seed = id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const sign = (seed + depth) % 2 === 0 ? 1 : -1;
+  return sign * (3 + (seed % 5));
+}
+
+interface DraggableCardProps {
+  rant: Rant;
+  gradient: string;
+  depth: number;
+  isTop: boolean;
+  onDismiss: () => void;
+}
+
+// each card owns its own MotionValues - clean mount/unmount with no shared state bleed
+function DraggableCard({ rant, gradient, depth, isTop, onDismiss }: DraggableCardProps) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotate = useTransform(x, [-250, 0, 250], [-18, 0, 18]);
+
+  async function handleDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
+    const speed = Math.hypot(info.velocity.x, info.velocity.y);
+    if (speed > THROW_VELOCITY) {
+      const angle = Math.atan2(info.velocity.y, info.velocity.x);
+      await Promise.all([
+        animate(x, Math.cos(angle) * 1000, { duration: 0.35, ease: "easeOut" }),
+        animate(y, Math.sin(angle) * 1000, { duration: 0.35, ease: "easeOut" }),
+      ]);
+      onDismiss();
+    } else {
+      void animate(x, 0, { type: "spring", stiffness: 300, damping: 24 });
+      void animate(y, 0, { type: "spring", stiffness: 300, damping: 24 });
+    }
+  }
+
+  return (
+    <motion.div
+      className={styles.card}
+      style={{
+        background: gradient,
+        x: isTop ? x : 0,
+        y: isTop ? y : depth * 8,
+        rotate: isTop ? rotate : stackRotation(rant.id, depth),
+        scale: 1 - depth * 0.05,
+        zIndex: STACK_SIZE - depth,
+      }}
+      drag={isTop}
+      dragMomentum={false}
+      onDragEnd={isTop ? handleDragEnd : undefined}
+      whileDrag={{ scale: 1.04 }}>
+      <div className={styles.overlay} aria-hidden />
+      <div className={styles.cardInner}>
+        <span className={styles.openQuote} aria-hidden>
+          &ldquo;
+        </span>
+        <p className={styles.quoteText}>{rant.text}</p>
+        <div className={styles.attribution}>
+          <span className={styles.authorName}>{rant.name || "Anonymous"}</span>
+          <time className={styles.quoteDate}>{formatDate(rant.createdAt)}</time>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 interface RantCardProps {
   rants: Rant[];
 }
 
 /**
- * @description Displays rants as auto-cycling inspirational posters. Each card
- * gets a gradient "mood" from the site palette; the quote flips in with a 3D
- * rotateY spring. Hover pauses the auto-advance. Click the left or right third
- * to retreat or advance manually.
+ * @description Drag-to-throw inspirational disaster card stack. Flick the top
+ * card in any direction to dismiss it - below throw velocity it springs back.
+ * Three cards visible with stable pseudo-random rotations peeking behind the top.
+ * Deck cycles infinitely.
  * @author Chris "Mo" Mochinski
  */
 export function RantCard({ rants }: RantCardProps) {
-  const [index, setIndex] = useState(0);
-  const [direction, setDirection] = useState<1 | -1>(1);
-  const [paused, setPaused] = useState(false);
-
-  const advance = useCallback(() => {
-    setDirection(1);
-    setIndex((i) => (i + 1) % rants.length);
-  }, [rants.length]);
-
-  const retreat = useCallback(() => {
-    setDirection(-1);
-    setIndex((i) => (i - 1 + rants.length) % rants.length);
-  }, [rants.length]);
-
-  useEffect(() => {
-    if (paused || rants.length <= 1) return;
-    const t = setInterval(advance, CYCLE_MS);
-    return () => clearInterval(t);
-  }, [paused, advance, rants.length]);
+  const [topIndex, setTopIndex] = useState(0);
 
   if (!rants.length) return null;
 
-  const rant = rants[index % rants.length];
-  const gradient = POSTER_GRADIENTS[index % POSTER_GRADIENTS.length];
-  const showDots = rants.length > 1 && rants.length <= 8;
-  const showCounter = rants.length > 8;
+  const n = rants.length;
+  // never show more cards than n-1 so the thrown card always unmounts cleanly
+  // before it can reappear as a back card with stale fly-off MotionValues
+  const visibleCount = Math.min(STACK_SIZE, Math.max(1, n - 1));
 
+  function dismiss() {
+    setTopIndex((i) => (i + 1) % n);
+  }
+
+  // render back-to-front: last in DOM = top card = highest natural z-order
   return (
-    <div
-      className={styles.stage}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}>
-      <AnimatePresence mode="wait" custom={direction}>
-        <motion.div
-          key={rant.id}
-          className={styles.card}
-          style={{ background: gradient }}
-          custom={direction}
-          variants={cardVariants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{ type: "spring", stiffness: 160, damping: 26 }}>
-          {/* dark overlay keeps white text readable on any gradient */}
-          <div className={styles.overlay} aria-hidden />
-
-          <div className={styles.cardInner}>
-            <span className={styles.openQuote} aria-hidden>
-              &ldquo;
-            </span>
-            <p className={styles.quoteText}>{rant.text}</p>
-            <div className={styles.attribution}>
-              <span className={styles.authorName}>{rant.name || "Anonymous"}</span>
-              <time className={styles.quoteDate}>{formatDate(rant.createdAt)}</time>
-            </div>
-          </div>
-
-          {/* progress bar resets each card via key change */}
-          {!paused && rants.length > 1 && (
-            <motion.div
-              key={`bar-${index}`}
-              className={styles.progressBar}
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: CYCLE_MS / 1000, ease: "linear" }}
-              style={{ transformOrigin: "left" }}
-            />
-          )}
-        </motion.div>
-      </AnimatePresence>
-
-      {/* invisible click zones: left third retreats, right third advances */}
-      <button
-        className={clsx(styles.navZone, styles.navPrev)}
-        onClick={retreat}
-        aria-label="previous quote"
-      />
-      <button
-        className={clsx(styles.navZone, styles.navNext)}
-        onClick={advance}
-        aria-label="next quote"
-      />
-
-      {showDots && (
-        <div className={styles.dots} aria-hidden>
-          {rants.map((_, i) => (
-            <span key={i} className={clsx(styles.dot, i === index && "dotActive")} />
-          ))}
-        </div>
-      )}
-
-      {showCounter && (
-        <p className={styles.counter} aria-label={`quote ${index + 1} of ${rants.length}`}>
-          {index + 1} / {rants.length}
-        </p>
-      )}
+    <div className={styles.stage}>
+      {Array.from({ length: visibleCount }, (_, i) => {
+        const depth = visibleCount - 1 - i; // 2 → 1 → 0, 0 is top
+        const rantIndex = (topIndex + depth) % n;
+        const rant = rants[rantIndex];
+        return (
+          <DraggableCard
+            key={rant.id}
+            rant={rant}
+            gradient={GRADIENTS[rantIndex % GRADIENTS.length]}
+            depth={depth}
+            isTop={depth === 0}
+            onDismiss={dismiss}
+          />
+        );
+      })}
     </div>
   );
 }

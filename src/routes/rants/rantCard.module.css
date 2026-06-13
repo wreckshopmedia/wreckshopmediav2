@@ -1,17 +1,21 @@
-/* 3D stage - perspective enables the rotateY flip on child cards */
+/* stage defines the shape - cards fill it absolutely so all three stack perfectly */
 .stage {
   position: relative;
   width: clamp(240px, 30vw, 430px);
-  perspective: 900px;
+  aspect-ratio: 8 / 5;
+  overflow: visible; /* back cards peek out past stage bounds */
 }
 
 .card {
   container-type: inline-size;
+  position: absolute;
+  inset: 0;
   width: 100%;
-  aspect-ratio: 8 / 5;
+  height: 100%;
   border-radius: 5px;
-  position: relative;
   overflow: hidden;
+  cursor: grab;
+  will-change: transform;
   box-shadow:
     0 2px 4px color(from var(--stroke-black) srgb r g b / 0.17),
     0 8px 16px color(from var(--stroke-black) srgb r g b / 0.25),
@@ -93,68 +97,4 @@
   letter-spacing: 0.07em;
   color: rgba(255, 255, 255, 0.6);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-/* auto-advance progress - position inside card at the bottom edge */
-.progressBar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.55);
-  z-index: 2;
-  pointer-events: none;
-}
-
-/* click zones - split the card into thirds for prev/next */
-.navZone {
-  position: absolute;
-  top: 0;
-  height: calc(100% - 2px); /* don't eat the progress bar tap area */
-  width: 33%;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  z-index: 3;
-  padding: 0;
-
-  &:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.6);
-    outline-offset: -3px;
-    border-radius: 5px;
-  }
-}
-
-.navPrev { left: 0; }
-.navNext { right: 0; }
-
-/* indicator row below the card */
-.dots {
-  display: flex;
-  gap: 0.45rem;
-  justify-content: center;
-  margin-top: 0.75rem;
-}
-
-.dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: color(from var(--color-text-title) srgb r g b / 0.20);
-  transition: background 0.25s ease;
-
-  &.dotActive {
-    background: color(from var(--color-text-title) srgb r g b / 0.70);
-  }
-}
-
-.counter {
-  font-family: var(--body);
-  font-size: 10px;
-  font-weight: 300;
-  letter-spacing: 0.1em;
-  color: color(from var(--color-text-body) srgb r g b / 0.40);
-  text-align: center;
-  margin-top: 0.65rem;
 }

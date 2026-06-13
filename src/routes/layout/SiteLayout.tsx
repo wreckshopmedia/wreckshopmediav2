@@ -33,7 +33,7 @@ export function SiteLayout() {
           <div className={styles.logoWrapper}>
             <Logo hillFlat />
           </div>
-          <NavRow visible />
+          <NavRow visible hillFlat />
 
           {/* canvas is inside navAnchor - zones offset from nav, not viewport corners */}
           <AnimatePresence mode="sync">

@@ -3,7 +3,7 @@ USE AS THEME FILE!
 ------------------ */
 
 /* --------- IMPORT THEME FONTS (WIP) --------- */
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@300;400;500;600;700&family=Outfit:wght@100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@300;400;500;600;700&family=Homemade+Apple&family=Outfit:wght@100..900&display=swap");
 
 :root {
   /* --------------------------------------------------- */
@@ -26,16 +26,19 @@ USE AS THEME FILE!
   --light-white: #f9f4f1; /* boat exterior */
 
   /* dark stuff  */
-  --stroke-black: #182026;
   --truer-black: #0e1012; /* use sparingly */
+  --stroke-black: #182026;
   --color-text-title: #423c38;
   --color-text-body: #050505;
-  --straw-gold: #e6c960;
+  --form-surface: #fbf8ef; /* form input bg - used with relative color opacity */
 
   /* ------------------ OTHER VARS ------------------ */
 
+  --error-tomato: #fe654f;
+  --error-tomato-jam: #cc2936;
   --heading: "Cormorant SC", serif;
   --body: "Outfit", sans-serif;
+  --handwriting: "Homemade Apple", cursive;
 
   /* ------------------------------------------ */
   /* ------------------------------------------ */
@@ -86,8 +89,7 @@ body {
 h1,
 h2,
 h3,
-h4
-{
+h4 {
   margin: 0;
   font-family: var(--heading);
   color: var(--color-text-title);
@@ -95,7 +97,8 @@ h4
   text-wrap: balance;
 }
 
-h5, h6 {
+h5,
+h6 {
   margin: 0;
   font-family: var(--body);
   color: var(--color-text-title);
@@ -124,7 +127,7 @@ h3 {
 
 /* rants disclaimer */
 h5 {
-  font-size: clamp(11px, 1.7cqi, 13px);
+  font-size: clamp(11px, 1.5cqi, 12px);
   font-weight: 400;
   font-family: var(--body);
   margin: 0;
@@ -135,7 +138,6 @@ h6 {
   font-family: var(--body);
   margin: 0;
 }
-
 
 p {
   margin: 0;

@@ -5,12 +5,12 @@ import { useReducedMotion } from "../../context/ReducedMotionContext";
 import styles from "./logo.module.css";
 
 // tunable visual constants - change these before digging into the JSX
-const SCALE_HERO = 1.1;    // logo scale on the landing page (inflated, pre-click)
+const SCALE_HERO = 1.15;    // logo scale on the landing page (inflated, pre-click)
 const SCALE_NAV = 1.0;     // logo scale once in the nav - the natural resting size
 
 const HILL_SCALE_X = 5;  // how wide the hill spreads during the flatten
-const HILL_SCALE_Y = 0.3;  // how flat the hill gets
-const HILL_STROKE = 15;    // stroke width at peak hill flatten
+const HILL_SCALE_Y = 0.25;  // how flat the hill gets
+const HILL_STROKE = 12;    // stroke width at peak hill flatten
 
 const SPRING_STIFFNESS = 120;
 const SPRING_DAMPING = 25;

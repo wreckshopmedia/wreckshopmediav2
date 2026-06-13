@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useRants } from "../../hooks/useRants";
+import { RantCard } from "./rantsIndex";
+// import { RantList } from "./rantsIndex";
 import { scratchpad } from "../../utils/scratchpad";
 import styles from "./rants.module.css";
 
@@ -10,22 +12,11 @@ import styles from "./rants.module.css";
  * @author Chris "Mo" Mochinski
  */
 export function Rants() {
-  const { rants, loading, error, addRant } = useRants();
+  const { rants, addRant } = useRants();
   const [text, setText] = useState("");
   const [name, setName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(false);
-
-  /** @description Format ISO timestamp to a friendly local string. */
-  function formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    });
-  }
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -55,19 +46,30 @@ export function Rants() {
     <>
       {/* ---------- RANT FORM ---------- */}
       <div className={styles.rantForm}>
-        <h2 className={styles.rantFormTitlePrompt}>What say ye?</h2>
-        <h5 className={styles.rantSubtitle}>no judgment...no rules...no mercy</h5>
+        <div className={styles.rantHeaderContainer}>
+          <div>
+            <h2 className={styles.rantFormTitlePrompt}>What say ye?</h2>
+            <h5 className={styles.rantSubtitle}>no judgment...no rules...no mercy</h5>
+          </div>
+          <h6 className={styles.rantDisclaimer}>
+          though your rant <span>will</span> be publicly visible, soooooooo...
+          </h6>
+        </div>
         <form onSubmit={handleSubmit}>
           <textarea
+            id="rant-field"
+            name="rant"
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="what's on your mind?"
             className={styles.rantTextarea}
-            rows={4}
+            rows={6}
             disabled={submitting}
           />
           <div className={styles.rantFormRow}>
             <input
+              id="rant-name"
+              name="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -77,6 +79,7 @@ export function Rants() {
               disabled={submitting}
             />
             <button
+              id="rant-submit"
               type="submit"
               className={styles.rantSubmit}
               disabled={!text.trim() || submitting}>
@@ -87,28 +90,15 @@ export function Rants() {
             <p className={styles.rantSubmitError}>something went wrong - try again</p>
           )}
         </form>
-        <h6 className={styles.rantDisclaimer}>
-          <span>*</span>remember - your rant will be public
-        </h6>
       </div>
 
-      {/* ---------- PRINTED RANT LIST ---------- */}
-      <div className={styles.rantList}>
-        {loading && <p className={styles.rantListStatus}>loading rants...</p>}
-        {error && <p className={styles.rantListStatus}>{error}</p>}
-        {!loading && !error && rants.length === 0 && (
-          <p className={styles.rantListStatus}>nothing yet. go ahead.</p>
-        )}
-        {rants.map((rant) => (
-          <div key={rant.id} className={styles.rantItem}>
-            <div className={styles.rantMeta}>
-              <time className={styles.rantTime}>{formatDate(rant.createdAt)}</time>
-              <span className={styles.rantName}>{rant.name}</span>
-            </div>
-            <p className={styles.rantText}>{rant.text}</p>
-          </div>
-        ))}
+      {/* ---------- INSPIRATIONAL POSTER CARDS ---------- */}
+      <div className={styles.rantCardWrap}>
+        <RantCard rants={rants} />
       </div>
+
+      {/* ---------- PRINTED RANT LIST (table view - swap in if needed) ---------- */}
+      {/* <RantList rants={rants} loading={loading} error={error} /> */}
     </>
   );
 }

@@ -3,6 +3,12 @@ import { Link, useLocation } from "react-router-dom";
 import { clsx } from "clsx";
 import styles from "./navRow.module.css";
 
+// tunable h1 animation values
+const TITLE_SCALE_HERO = 1.0;      // landing / pre-reveal scale
+const TITLE_SCALE_NAV = 0.93;      // settled nav scale
+const TITLE_SPACING_HERO = "0.2em";
+const TITLE_SPACING_NAV = "0.12em";
+
 const LEFT_ROUTES = [
   { path: "/home", label: "Home" },
   { path: "/about", label: "About" },
@@ -23,6 +29,8 @@ interface NavRowProps {
    * fade in - used on initial landing reveal and non-landing route mounts.
    */
   visible: boolean;
+  /** When true, h1 skips its settle animation and mounts already in nav state (SiteLayout). */
+  hillFlat?: boolean;
 }
 
 /**
@@ -31,7 +39,7 @@ interface NavRowProps {
  * down 7px with a spring - no extra elements, no per-change opacity toggling.
  * @author Chris "Mo" Mochinski
  */
-export function NavRow({ visible }: NavRowProps) {
+export function NavRow({ visible, hillFlat = false }: NavRowProps) {
   const { pathname } = useLocation();
 
   const renderLink = (r: (typeof ALL_ROUTES)[number], i: number) => {
@@ -60,7 +68,21 @@ export function NavRow({ visible }: NavRowProps) {
   return (
     <div className={styles.titleRow} id="nav-row">
       <div className={styles.linkGroup}>{LEFT_ROUTES.map((r, i) => renderLink(r, i))}</div>
-      <h1 className={styles.title}>Wreck Shop</h1>
+      <motion.h1
+        className={styles.title}
+        initial={{ scale: TITLE_SCALE_HERO, letterSpacing: TITLE_SPACING_HERO }}
+        animate={{
+          scale: visible ? TITLE_SCALE_NAV : TITLE_SCALE_HERO,
+          letterSpacing: visible ? TITLE_SPACING_NAV : TITLE_SPACING_HERO,
+        }}
+        transition={
+          visible && !hillFlat
+            ? { type: "spring", stiffness: 100, damping: 18 }
+            : { duration: 0 }
+        }
+        style={{ transformBox: "fill-box" }}>
+        Wreck Shop
+      </motion.h1>
       <div className={styles.linkGroup}>{RIGHT_ROUTES.map((r, i) => renderLink(r, i))}</div>
     </div>
   );

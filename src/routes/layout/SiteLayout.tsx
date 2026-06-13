@@ -7,6 +7,13 @@ import { RouteContext } from "../../context/routeContextIndex";
 import { scratchpad } from "../../utils/scratchpad";
 import styles from "./siteLayout.module.css";
 
+// per-route logo visual overrides - add entries here for more weird states
+const LOGO_ROUTE_FX: Record<string, { opacity: number; filter: string }> = {
+  "/rants": { opacity: 0.7, filter: "blur(1px)" },
+};
+
+const DEFAULT_LOGO_FX = { opacity: 1, filter: "blur(0px)" };
+
 /**
  * @description Full-viewport canvas for all non-landing routes. The navAnchor is
  * vertically centered and never moves. contentCanvas lives inside navAnchor so all
@@ -30,9 +37,12 @@ export function SiteLayout() {
       <div className={styles.siteLayout} id="site-layout">
         {/* navAnchor is the coordinate origin for all zone content */}
         <div className={styles.navAnchor} id="nav-anchor">
-          <div className={styles.logoWrapper}>
+          <motion.div
+            className={styles.logoWrapper}
+            animate={LOGO_ROUTE_FX[pathname] ?? DEFAULT_LOGO_FX}
+            transition={{ duration: 0.27, ease: "easeIn" }}>
             <Logo hillFlat />
-          </div>
+          </motion.div>
           <NavRow visible hillFlat />
 
           {/* canvas is inside navAnchor - zones offset from nav, not viewport corners */}

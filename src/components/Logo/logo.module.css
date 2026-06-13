@@ -1,42 +1,40 @@
-/*
-INITIAL MODULE - logo.module.css
-*/
-
 .logo {
-  /* TESTING STUFF */
-  max-width: clamp(150px, 40cqi, 200px);
+  max-width: clamp(150px, calc(120px + 10vw), 200px);
+  transition: filter 80ms ease-out;
+  overflow: visible;
 }
 
-.treeGreenFill {
-    fill: var(--light-green);
+/* logo is only inside a <button> on the landing route - filter/hover are inert in SiteLayout */
+button .logo {
+  filter: grayscale(0.2) brightness(1.08) saturate(0.7);
+  transition: filter 175ms ease-in;
+
+  path[id*="sail"] {
+    transition: filter 175ms ease-in;
+    filter: brightness(0.94) saturate(1.1);
+  }
+
+  /* :not(.entered) prevents hover from fighting the entered state once clicked */
+  &:not(.entered):hover {
+    transition: filter 35ms linear;
+    filter: grayscale(0.05) brightness(1.02) saturate(1.0);
+
+    path[id*="sail"] {
+      transition: filter 35ms linear;
+      filter: brightness(1.13) saturate(0.94);
+    }
+  }
 }
 
-.boatLightBlueFill {
-    fill: var(--light-blue);
-    stop-color: var(--light-blue);
-}
+/*
+  Entered state - applied when isRevealing (landing after click) OR hillFlat (SiteLayout).
+  Lives outside button scope so it persists after navigation, no snap.
+*/
+.logo.entered {
+  transition: filter 200ms ease-out;
+  filter: grayscale(0) brightness(0.96) saturate(1.35);
 
-.treeLightBrownFill {
-    fill: var(--light-brown);
-    stop-color: var(--light-brown);
+  path[id*="sail"] {
+    filter: brightness(1.1) saturate(1.0);
+  }
 }
-
-.hillGreenFill {
-    fill: var(--green);
-    stop-color: var(--green);
-}
-
-.boatWindowGreenFill {
-    fill: var(--green);
-    stop-color: var(--green);
-}
-
-.sailLightTanFill {
-    fill: var(--light-tan);
-    stop-color: var(--light-tan);
-}
-
-.boatLightWhiteFill {
-    fill: var(--light-white);
-    stop-color: var(--light-white);
-}   

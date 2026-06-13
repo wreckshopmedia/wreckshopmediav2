@@ -12,43 +12,40 @@ USE AS THEME FILE!
   /* --------------------------------------------------- */
   /* --------------------------------------------------- */
 
-  /* theme colors rough wip */
-  
-  /* LIGHT VARS + THEIR RICH VERSION FOR LOGO HOVER - WIP!*/
-  --light-green: #DAEBC4;
-  --rich-light-green: #d1e5b6;
-  --light-blue: #8DACC2;
-  --rich-light-blue: #65a0ca;
-  --light-brown: #A77E58;
-  --rich-light-brown: #956d47;
-  --green: #A9C08C;
-  --rich-green: #9ebf76;
-  --light-tan: #F2EEDE;
-  --rich-light-tan: #f8f5ed;
-  --light-white: #FBF8EF;
-  --rich-light-white: #f7f6f0;
+  /* sky gradient  */
+  --sky-blue: #d6efff;
+  --sky-tan: #fbf0d6;
 
-  
-  /* COLORS W/O RICH, ALWAYS SAME  */
-  
-  --stroke-black: #22181C;
+  /* boat fills */
+  --light-green: #daebc4; /* tee green / treetop */
+  --green: #a6bba0; /*  / hill */
+  --light-blue: #8c9bcf; /* cool steel */
+  --dark-blue: #253c78; /* regal navy */
+  --light-brown: #ac8c72; /* trunk + boat inner */
+  --light-tan: #f2eede; /* sail + boat exterior LIGHTENS */
+  --light-white: #f9f4f1; /* boat exterior */
 
-  /* use of those colors and other things  */
-
-  --color-gradient-top: #d6efff;
-  --color-gradient-bottom: #fbf0d6;
-  --color-text-title: #4e3e39;
+  /* dark stuff  */
+  --stroke-black: #182026;
+  --truer-black: #0e1012; /* use sparingly */
+  --color-text-title: #423c38;
   --color-text-body: #050505;
+  --straw-gold: #e6c960;
+
+  /* ------------------ OTHER VARS ------------------ */
 
   --heading: "Cormorant SC", serif;
   --body: "Outfit", sans-serif;
+
+  /* ------------------------------------------ */
+  /* ------------------------------------------ */
 
   color-scheme: light dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(var(--color-gradient-top), var(--color-gradient-bottom));
+  background: linear-gradient(var(--sky-blue), var(--sky-tan));
 }
 
 /* --------------------------------------------------- */
@@ -71,7 +68,6 @@ USE AS THEME FILE!
 } */
 
 #root {
-  /* width: 1126px; */
   max-width: 100%;
   margin: 0 auto;
   text-align: center;
@@ -81,8 +77,6 @@ USE AS THEME FILE!
   align-items: center;
   flex-direction: column;
   box-sizing: border-box;
-  /* container-type here so cqi units work everywhere downstream */
-  container-type: inline-size;
 }
 
 body {
@@ -91,28 +85,37 @@ body {
 
 h1,
 h2,
-h3 {
+h3,
+h4 {
+  margin: 0;
   font-family: var(--heading);
   color: var(--color-text-title);
-  letter-spacing: 0.2em;
-  margin: 0;
+  line-height: 1.1em;
 }
 
 h1 {
-  font-size: clamp(1.25rem, 3vw, 1.75rem);
-  font-weight: 400;
+  font-size: clamp(1.25rem, 3.2vw, 1.75rem);
+  letter-spacing: 0.2em;
+  font-weight: 500;
 }
 
 h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
+  font-size: clamp(1.15rem, 2.8vw, 1.6rem);
+  letter-spacing: 0.15em;
+  font-weight: 500;
   margin: 0;
+}
+
+h3 {
+  font-size: clamp(1.075rem, 2.4vw, 1.5rem);
+  letter-spacing: 0.1em;
+  font-weight: 500;
 }
 
 p {
   margin: 0;
   font-family: var(--body);
-  font-size: 1rem;
+  font-size: clamp(13px, calc(4px + 1cqi + 0.3vw), 16px);
   font-weight: 300;
+  line-height: 1.1em;
 }

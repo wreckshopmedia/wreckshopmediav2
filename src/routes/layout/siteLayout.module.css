@@ -1,12 +1,32 @@
+/* full-viewport canvas - navAnchor centers here and never moves */
+
 .siteLayout {
+  position: relative;
+  width: 100%;
+  height: 100svh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  container-type: inline-size;
-  width: min(97cqi, 950px);
+  justify-content: center;
 }
 
-/* constrains Logo's cqi units to the same context as the landing button */
+/* nav + content origin - overflow visible so zone content can extend in all directions */
+
+.navAnchor {
+  /* CONTAINER since not full screen width */
+  /* any cqi above this defaults to vh */
+  container-type: inline-size; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(90cqi, 950px);
+  position: relative;
+  z-index: 10;
+  overflow: visible;
+}
+
+/* constrains Logo's cqi units to match the landing button context */
+
 .logoWrapper {
   container-type: inline-size;
   width: min(90cqi, 300px);
@@ -14,10 +34,19 @@
   justify-content: center;
 }
 
+/*
+  Canvas anchored to navAnchor - zones are positioned relative to the nav block,
+  not the viewport. overflow: visible lets content escape in all directions.
+  Width/height 100% matches navAnchor's footprint as the coordinate base.
+*/
 
-.main {
+.contentCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 5;
 }

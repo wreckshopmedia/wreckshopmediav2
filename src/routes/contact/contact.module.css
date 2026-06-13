@@ -1,5 +1,59 @@
-.contact {
+/* top center: short blurb + email, above the nav */
+.contactInfo {
+  position: absolute;
+  bottom: calc(100% + 2rem);
+  left: 50%;
+  translate: -50% 0;
+  text-align: center;
+  pointer-events: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 0.6rem;
+}
+
+.contactBlurb {
+  color: var(--color-text-body);
+  max-width: 28ch;
+}
+
+.contactEmail {
+  font-family: var(--body);
+  font-size: clamp(13px, 1.4cqi, 15px);
+  font-weight: 400;
+  color: var(--color-text-title);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* bottom center: social icon row, below the nav */
+.socialRow {
+  position: absolute;
+  top: calc(100% + 2.5rem);
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  pointer-events: auto;
+}
+
+/* placeholder until Mo drops in real icons */
+.socialPlaceholder {
+  font-family: var(--body);
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-body);
+  opacity: 0.5;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 1;
+  }
 }

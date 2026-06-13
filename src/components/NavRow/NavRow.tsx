@@ -42,7 +42,7 @@ export function NavRow({ visible }: NavRowProps) {
         initial={{ opacity: visible ? 1 : 0, y: 0 }}
         animate={{
           opacity: visible ? 1 : 0,
-          y: isActive ? -8 : 0,
+          y: isActive ? -6 : 0,
         }}
         transition={{
           opacity: { duration: 0.4, delay: visible ? 0.3 + i * 0.08 : 0 },
@@ -58,7 +58,7 @@ export function NavRow({ visible }: NavRowProps) {
   };
 
   return (
-    <div className={styles.titleRow}>
+    <div className={styles.titleRow} id="nav-row">
       <div className={styles.linkGroup}>{LEFT_ROUTES.map((r, i) => renderLink(r, i))}</div>
       <h1 className={styles.title}>Wreck Shop</h1>
       <div className={styles.linkGroup}>{RIGHT_ROUTES.map((r, i) => renderLink(r, i))}</div>

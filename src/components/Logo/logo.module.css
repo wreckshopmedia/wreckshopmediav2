@@ -1,5 +1,5 @@
 .logo {
-  max-width: clamp(150px, calc(120px + 10vw), 200px);
+  max-width: clamp(105px, calc(70px + 12vw), 170px);
   transition: filter 80ms ease-out;
   overflow: visible;
 }
@@ -38,3 +38,4 @@ button .logo {
     filter: brightness(1.1) saturate(1.0);
   }
 }
+

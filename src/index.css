@@ -86,11 +86,21 @@ body {
 h1,
 h2,
 h3,
-h4 {
+h4
+{
   margin: 0;
   font-family: var(--heading);
   color: var(--color-text-title);
   line-height: 1.1em;
+  text-wrap: balance;
+}
+
+h5, h6 {
+  margin: 0;
+  font-family: var(--body);
+  color: var(--color-text-title);
+  line-height: 1.1em;
+  text-wrap: balance;
 }
 
 h1 {
@@ -112,10 +122,26 @@ h3 {
   font-weight: 500;
 }
 
+/* rants disclaimer */
+h5 {
+  font-size: clamp(11px, 1.7cqi, 13px);
+  font-weight: 400;
+  font-family: var(--body);
+  margin: 0;
+}
+h6 {
+  font-size: clamp(9px, 1.4cqi, 11px);
+  font-weight: 400;
+  font-family: var(--body);
+  margin: 0;
+}
+
+
 p {
   margin: 0;
   font-family: var(--body);
   font-size: clamp(13px, calc(4px + 1cqi + 0.3vw), 16px);
   font-weight: 300;
   line-height: 1.1em;
+  text-wrap: pretty;
 }

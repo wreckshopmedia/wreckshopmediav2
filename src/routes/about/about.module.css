@@ -2,8 +2,9 @@
   position: absolute;
   bottom: clamp(100px, calc(8% + 18dvh), 499px);
   left: 0;
-  max-width: clamp(200px, 37%, 380px);
+  max-width: clamp(200px, 37%, 320px);
   pointer-events: auto;
+  transform: rotate(-7deg);
 
   .aboutBlurbTextWrapper {
    display: flex;

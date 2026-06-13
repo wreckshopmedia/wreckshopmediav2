@@ -4,6 +4,17 @@ import clsx from "clsx";
 import { useReducedMotion } from "../../context/ReducedMotionContext";
 import styles from "./logo.module.css";
 
+// tunable visual constants - change these before digging into the JSX
+const SCALE_HERO = 1.1;    // logo scale on the landing page (inflated, pre-click)
+const SCALE_NAV = 1.0;     // logo scale once in the nav - the natural resting size
+
+const HILL_SCALE_X = 5;  // how wide the hill spreads during the flatten
+const HILL_SCALE_Y = 0.3;  // how flat the hill gets
+const HILL_STROKE = 15;    // stroke width at peak hill flatten
+
+const SPRING_STIFFNESS = 120;
+const SPRING_DAMPING = 25;
+
 interface LogoProps {
   onReady?: () => void;
   isRevealing?: boolean;
@@ -31,12 +42,12 @@ export function Logo({ onReady, isRevealing = false, hillFlat = false }: LogoPro
   useEffect(() => {
     if (isRevealing && animationsEnabled) {
       void hillControls.start({
-        scaleY: 0.2,
-        scaleX: 4.5,
-        strokeWidth: 15,
+        scaleY: HILL_SCALE_Y,
+        scaleX: HILL_SCALE_X,
+        strokeWidth: HILL_STROKE,
         transition: {
-          scaleY: { duration: 0.35, ease: "easeIn" },
-          scaleX: { duration: 0.6, delay: 0.2, ease: "easeOut" },
+          scaleY: { duration: 0.3, ease: "easeIn" },
+          scaleX: { duration: 0.5,  ease: "easeOut" },
           strokeWidth: { duration: 0.35, ease: "easeIn" },
         },
       });
@@ -51,6 +62,17 @@ export function Logo({ onReady, isRevealing = false, hillFlat = false }: LogoPro
       fill="none"
       xmlns="http://www.w3.org/2000/svg">
       <g id="TREE IDEA">
+        {/* boat + tree scale toward bottom center on reveal; hill is independent */}
+        <motion.g
+          id="boat-tree-content"
+          animate={{ scale: isRevealing ? SCALE_NAV : hillFlat ? SCALE_NAV : SCALE_HERO }}
+          transition={
+            isRevealing
+              ? { type: 'spring', stiffness: SPRING_STIFFNESS, damping: SPRING_DAMPING }
+              : { duration: 0 }
+          }
+          style={{ transformBox: 'fill-box', originX: '50%', originY: '100%' }}
+        >
         <g id="BOAT">
           <g id="boat-inside-back">
             <mask id="path-1-inside-1_1945_48" fill="white">
@@ -363,10 +385,11 @@ export function Logo({ onReady, isRevealing = false, hillFlat = false }: LogoPro
             />
           </g>
         </g>
+        </motion.g>
         <motion.g
           id="HILL"
           animate={hillControls}
-          initial={hillFlat ? { scaleY: 0.2, scaleX: 4.5, strokeWidth: 15 } : { strokeWidth: 3 }}
+          initial={hillFlat ? { scaleY: HILL_SCALE_Y, scaleX: HILL_SCALE_X, strokeWidth: HILL_STROKE } : { strokeWidth: 3 }}
           style={{ transformBox: 'fill-box', originX: '50%', originY: '20%' }}
         >
           <path

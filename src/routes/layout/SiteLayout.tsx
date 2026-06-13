@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Logo } from "../../components/Logo/logoIndex";
 import { NavRow } from "../../components/NavRow/navRowIndex";
@@ -44,20 +44,19 @@ export function SiteLayout() {
             <Logo hillFlat />
           </motion.div>
           <NavRow visible hillFlat />
+          <p className={styles.constructionNotice}>notice: this site is very much under construction</p>
 
           {/* canvas is inside navAnchor - zones offset from nav, not viewport corners */}
-          <AnimatePresence mode="sync">
-            <motion.main
-              key={pathname}
-              id="main"
-              className={styles.contentCanvas}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}>
-              <Outlet />
-            </motion.main>
-          </AnimatePresence>
+          {/* key swap forces remount on route change - no AnimatePresence needed for fade-in only */}
+          <motion.main
+            key={pathname}
+            id="main"
+            className={styles.contentCanvas}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.35, ease: "easeIn" }}>
+            <Outlet />
+          </motion.main>
         </div>
       </div>
     </RouteContext.Provider>

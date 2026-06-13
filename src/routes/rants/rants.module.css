@@ -203,11 +203,13 @@
   position: absolute;
   top: 100%;
   left: 0;
-  margin-top: 0.3em;
+  margin-top: 0.4em;
   font-family: var(--body);
   font-size: 12px;
-  font-weight: 500;
-  color: var(--error-tomato-jam);
+  padding-left: 0.1em;
+  font-weight: 400;
+  text-align: left;
+  color: var(--error-tomato);
 }
 
 /* loading / error / empty state in the list */

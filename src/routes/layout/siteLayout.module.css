@@ -34,6 +34,18 @@
   justify-content: center;
 }
 
+.constructionNotice {
+  font-family: var(--body);
+  font-size: clamp(13px, 2.25vw, 15px);
+  font-weight: 500;
+  color: var(--error-tomato);
+  opacity: 0.7;
+  text-wrap: balance;
+  text-align: center;
+  margin-top: 0.5rem;
+  pointer-events: none;
+}
+
 /*
   Canvas anchored to navAnchor - zones are positioned relative to the nav block,
   not the viewport. overflow: visible lets content escape in all directions.

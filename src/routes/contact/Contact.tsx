@@ -10,7 +10,7 @@ export function Contact() {
     <>
       <div className={styles.contactInfo}>
         <p className={styles.contactBlurb}>
-          Got a project, a question, or just want to yell into the void? Start here.
+          got a project, a question, or just want to yell into the void? start here:
         </p>
         <a href="mailto:mo@wreckshopmedia.com" className={styles.contactEmail}>
           mo@wreckshopmedia.com
@@ -19,9 +19,36 @@ export function Contact() {
 
       <div className={styles.socialRow}>
         {/* icons coming - Mo selecting these */}
-        <span className={styles.socialPlaceholder}>github</span>
-        <span className={styles.socialPlaceholder}>linkedin</span>
-        <span className={styles.socialPlaceholder}>instagram</span>
+        <a
+          target="_blank"
+          href="https://github.com/chrismochinski"
+          className={styles.socialPlaceholder}>
+          my github
+        </a>
+        <a
+          target="_blank"
+          href="https://github.com/wreckshopmedia"
+          className={styles.socialPlaceholder}>
+          wsm github
+        </a>
+        <a
+          target="_blank"
+          href="https://www.linkedin.com/in/chrismochinski"
+          className={styles.socialPlaceholder}>
+          linkedin
+        </a>
+        <a
+          target="_blank"
+          href="https://instagram.com/chrismochinski"
+          className={styles.socialPlaceholder}>
+          instagram
+        </a>
+        <a
+          target="_blank"
+          href="https://www.backstage.com/u/chris-mo-mochinski/"
+          className={styles.socialPlaceholder}>
+          backstage
+        </a>
       </div>
     </>
   );

@@ -20,40 +20,48 @@
 .contactEmail {
   font-family: var(--body);
   font-size: clamp(13px, 1.4cqi, 15px);
-  font-weight: 400;
-  color: var(--color-text-title);
+  font-weight: 500;
+  color: color(from var(--color-text-title) srgb r g b / 0.8);
   text-decoration: none;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
+  text-decoration: underline;
+  text-decoration-color: color(from var(--color-text-title) srgb r g b / 0.4);
+  text-underline-offset: 0.09em;
 
   &:hover {
-    text-decoration: underline;
+    text-decoration-color: color(from var(--color-text-title) srgb r g b / 1);
+    color: color(from var(--color-text-title) srgb r g b / 1);
   }
 }
 
 /* bottom center: social icon row, below the nav */
 .socialRow {
   position: absolute;
-  top: calc(100% + 2.5rem);
+  top: clamp(320px, calc(90% + 8vh), 340px);
   left: 50%;
   translate: -50% 0;
   display: flex;
-  gap: 2rem;
+  gap: min(1.75rem, 6vw);
   align-items: center;
+  justify-content: center;
+  width: 85%;
   pointer-events: auto;
 }
 
 /* placeholder until Mo drops in real icons */
 .socialPlaceholder {
   font-family: var(--body);
-  font-size: 12px;
-  font-weight: 300;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-text-body);
-  opacity: 0.5;
-  cursor: pointer;
+  font-size: clamp(12px, 1.5cqi, 13px);
+  font-weight: 400;
+  color: color(from var(--color-text-title) srgb r g b / 0.8);
+  text-decoration: none;
+  letter-spacing: 0.08em;
+  text-decoration: underline;
+  text-decoration-color: color(from var(--color-text-title) srgb r g b / 0.4);
+  text-underline-offset: 0.09em;
 
   &:hover {
-    opacity: 1;
+    text-decoration-color: color(from var(--color-text-title) srgb r g b / 1);
+    color: color(from var(--color-text-title) srgb r g b / 1);
   }
 }

@@ -70,7 +70,13 @@ export function NavRow({ visible, hillFlat = false }: NavRowProps) {
       <div className={styles.linkGroup}>{LEFT_ROUTES.map((r, i) => renderLink(r, i))}</div>
       <motion.h1
         className={styles.title}
-        initial={{ scale: TITLE_SCALE_HERO, letterSpacing: TITLE_SPACING_HERO }}
+        // when hillFlat (SiteLayout mounts already settled) start small, else a
+        // HERO frame paints before the duration:0 jump and flashes big for a tick
+        initial={
+          hillFlat
+            ? { scale: TITLE_SCALE_NAV, letterSpacing: TITLE_SPACING_NAV }
+            : { scale: TITLE_SCALE_HERO, letterSpacing: TITLE_SPACING_HERO }
+        }
         animate={{
           scale: visible ? TITLE_SCALE_NAV : TITLE_SCALE_HERO,
           letterSpacing: visible ? TITLE_SPACING_NAV : TITLE_SPACING_HERO,

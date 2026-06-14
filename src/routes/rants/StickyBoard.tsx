@@ -60,11 +60,13 @@ function seededLayout(id: string) {
 
 /**
  * @description Picks a font-size clamp for the note text based on rant length -
- * a few words read big, a wall of text shrinks to fit the square. Three tiers
- * past the short default; the cqi middle value still scales with note size.
+ * a handful of words reads huge, a wall of text shrinks to fit the square. Each
+ * clamp is (floor px, cqi middle that scales with note size, ceiling px). Tweak
+ * the tiers / breakpoints freely. Max length is MAX_RANT_LENGTH.
  */
 function noteFontSize(len: number): string {
-  if (len <= 30) return "clamp(14px, 11cqi, 20px)";
+  if (len <= 12) return "clamp(20px, 16cqi, 34px)"; // super short - go big
+  if (len <= 30) return "clamp(15px, 12cqi, 23px)";
   if (len <= 80) return "clamp(12px, 8.5cqi, 16px)";
   if (len <= 140) return "clamp(10px, 7cqi, 13px)";
   return "clamp(9px, 5.5cqi, 11px)";

@@ -8,9 +8,8 @@ import { scratchpad } from "../../utils/scratchpad";
 import styles from "./siteLayout.module.css";
 
 // per-route logo visual overrides - add entries here for more weird states
-const LOGO_ROUTE_FX: Record<string, { opacity: number; filter: string }> = {
-  "/rants": { opacity: 0.7, filter: "blur(1px)" },
-};
+// (e.g. "/rants": { opacity: 0.7, filter: "blur(1px)" }). empty = no route tweaks.
+const LOGO_ROUTE_FX: Record<string, { opacity: number; filter: string }> = {};
 
 const DEFAULT_LOGO_FX = { opacity: 1, filter: "blur(0px)" };
 
@@ -43,8 +42,18 @@ export function SiteLayout() {
             transition={{ duration: 0.27, ease: "easeIn" }}>
             <Logo hillFlat />
           </motion.div>
-          <NavRow visible hillFlat />
-          <p className={styles.constructionNotice}>notice: this site is very much under construction</p>
+          {/* wrapper is the positioning context so the notice can pin just under
+              the nav row without adding height to the centered navAnchor flow */}
+          <div className={styles.navRowWrap}>
+            <NavRow visible hillFlat />
+            <motion.p
+              className={styles.constructionNotice}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.7 }}
+              transition={{ duration: 0.5, delay: 0.6 }}>
+              notice: this site is very much under construction
+            </motion.p>
+          </div>
 
           {/* canvas is inside navAnchor - zones offset from nav, not viewport corners */}
           {/* key swap forces remount on route change - no AnimatePresence needed for fade-in only */}

@@ -10,7 +10,7 @@ export function Contact() {
     <>
       <div className={styles.contactInfo}>
         <p className={styles.contactBlurb}>
-          got a project, a question, or just want to yell into the void? start here:
+          Got a project, a question, or just want to yell at me? Start here:
         </p>
         <a href="mailto:mo@wreckshopmedia.com" className={styles.contactEmail}>
           mo@wreckshopmedia.com

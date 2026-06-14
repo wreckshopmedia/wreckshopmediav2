@@ -235,7 +235,7 @@ function ComposePad({ nextColor, onStick }: ComposePadProps) {
 
 interface StickyBoardProps {
   rants: Rant[];
-  addRant: (text: string, name: string) => Promise<boolean>;
+  addRant: (text: string, name: string, color?: number) => Promise<boolean>;
   updatePlacement: (id: string, posX: number, posY: number, rotation: number) => void;
   deleteRant: (id: string) => void;
 }

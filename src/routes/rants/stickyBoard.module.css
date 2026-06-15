@@ -20,9 +20,10 @@
   container-type: inline-size;
   position: absolute;
   /* locked square at any screen size; can shrink small (text goes unreadable, ok for now) */
-  width: clamp(80px, 15vw, 165px);
+  width: clamp(80px, 18vw, 180px);
   aspect-ratio: 1;
-  padding: 1em 0.9em;
+  padding-block: min(3cqi, 12px);
+  padding-inline: min(5cqi, 16px);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -39,8 +40,8 @@
 
 .noteText {
   font-family: var(--handwriting);
-  /* font-size is set inline per rant length - see noteFontSize() */
-  line-height: 1.45em;
+  /* font-size: */ /* > FUNCTION DEFINITION */
+  /* line-height: 1.35em; */ /* > FUNCTION DEFINITION */
   color: var(--color-text-title);
   margin: 0;
   overflow: hidden;
@@ -49,7 +50,7 @@
 
 .noteAuthor {
   font-family: var(--body);
-  font-size: max(6cqi, 9px);
+  font-size: min(13cqi, 10px);
   font-weight: 600;
   letter-spacing: 0.04em;
   color: color(from var(--color-text-title) srgb r g b / 0.7);
@@ -68,7 +69,7 @@
   left: 50%;
   top: 28%;
   translate: -50% 0;
-  width: clamp(175px, 24vw, 250px);
+  width: clamp(150px, 20vw, 210px);
   aspect-ratio: 1;
   rotate: -5deg;
   z-index: 30;
@@ -174,8 +175,8 @@
 /* trash target - bottom-left so it's clear of the pad. notes dropped here vanish */
 .trash {
   position: absolute;
-  left: 1.2em;
-  bottom: 1.2em;
+  left: clamp(3rem, 5vw, 4rem);
+  bottom: clamp(2rem, 5vh, 3rem);
   width: 2.4em;
   height: 2.4em;
   display: flex;
@@ -187,4 +188,16 @@
   border: 1px dashed color(from var(--color-text-title) srgb r g b / 0.35);
   z-index: 20;
   pointer-events: auto;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease;
+
+  /* armed: a note is hovering, ready to be tossed - pop bigger + tomato glow */
+  &.trashArmed {
+    transform: scale(1.35);
+    background: color(from var(--error-tomato) srgb r g b / 0.85);
+    border-color: var(--error-tomato);
+    border-style: solid;
+  }
 }

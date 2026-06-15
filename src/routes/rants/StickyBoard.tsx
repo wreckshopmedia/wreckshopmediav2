@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, useMotionValue, useSpring } from "motion/react";
+import { animate, motion, useMotionValue, useSpring } from "motion/react";
 import type { PanInfo } from "motion/react";
 import type { Rant } from "../../hooks/useRants";
 import { scratchpad } from "../../utils/scratchpad";
@@ -15,15 +15,15 @@ const NOTE_COLORS = [
   "var(--sticky-note-peach)",
 ] as const;
 
-const MAX_RANT_LENGTH = 180;
+const MAX_RANT_LENGTH = 200;
 
 // drag velocity (px/s) that leans the note to the full angle. faster drag = more
 // lean; when you slow/stop it eases back upright (gravity), and on release it
 // freezes exactly at whatever angle it's at in that moment.
-const LEAN_VELOCITY = 200;
-const LEAN_MAX_DEG = 22;
+const LEAN_VELOCITY = 50;
+const LEAN_MAX_DEG = 30;
 // hard ceiling on a note's frozen angle so repeated drags can never spin it silly
-const FROZEN_ANGLE_CAP = 26;
+const FROZEN_ANGLE_CAP = 30;
 // natural hang angle when grabbed off-center - grab the left third and it tilts
 // right (like pinching the top-left corner), right third tilts left, middle hangs
 // straight. this is the resting point gravity pulls toward while you hold it.
@@ -68,19 +68,59 @@ function seededLayout(id: string) {
   };
 }
 
+/* 
+------------------------------------------------------------
+------------------- INLINE STYLES NEEDED -------------------
+-------- All text sizes need tweaks to look natural --------
+------------------------------------------------------------
+*/
+
+/* TODO revisit font sizes when more done */
+
 /**
- * @description Picks a font-size for the note text based on rant length - a
- * handful of words reads huge, a wall of text shrinks to fit the square. Pure
- * cqi (no clamp/floor) so it scales straight off the note's own width as the
- * container; tiny notes go fully unreadable on purpose. Tweak tiers freely.
+ * @description Picks a font-size for the note text based on rant length
  */
 function noteFontSize(len: number): string {
-  if (len <= 12) return "16cqi"; // super short - go big
-  if (len <= 30) return "12cqi";
-  if (len <= 80) return "8.5cqi";
-  if (len <= 140) return "7cqi";
-  return "5.5cqi";
+  if (len <= 12) return "20cqi"; // super short - go big
+  if (len <= 30) return "16cqi";
+  if (len <= 80) return "9.5cqi";
+  if (len <= 140) return "7.5cqi";
+  return "6cqi";
 }
+
+/* TODO revisit line heights when more done */
+
+/**
+ * @description Picks a line-height for the note text based on rant length.
+ */
+function noteLineHeight(len: number): string {
+  if (len <= 12) return "1.15em";
+  if (len <= 30) return "1.2em";
+  if (len <= 80) return "1.35em";
+  if (len <= 140) return "1.35em";
+  return "1.5em";
+}
+
+/**
+ * @description Some typefaces are getting cut of on the edges.
+ * Larger = a little padding. Small = not needed
+ * This is probably partially due to dynamic line height
+ * Note that this is INNER padding (on the text element itself)
+ */
+function noteInnerPadding(len: number): string {
+  if (len <= 12) return "0.3em 0.2em";
+  if (len <= 30) return "0.25em 0.15em";
+  if (len <= 80) return "0.25em 0.18em";
+  if (len <= 140) return "0.2em";
+  return "0.2em 0.15em";
+}
+
+/* 
+------------------------------------------------------
+------------------- POINTER UTILS --------------------
+------------------------------------------------------
+
+*/
 
 /** @description True if a page-space point falls inside the given element's box. */
 function pointInRect(x: number, y: number, rect: DOMRect | undefined): boolean {
@@ -98,6 +138,8 @@ interface StickyNoteProps {
   trashRef: React.RefObject<HTMLDivElement | null>;
   onCommit: (id: string, xFrac: number, yFrac: number, rotation: number) => void;
   onTrash: (id: string) => void;
+  /** fired while dragging when this note enters/leaves the trash hitbox */
+  onTrashHover: (over: boolean) => void;
 }
 
 /**
@@ -119,10 +161,13 @@ function StickyNote({
   trashRef,
   onCommit,
   onTrash,
+  onTrashHover,
 }: StickyNoteProps) {
   const noteRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
+  // grab/drag scale - shrinks dock-style when held over the trash to telegraph the toss
+  const scale = useMotionValue(1);
   // rotateTarget is the angle we steer toward; the spring gives the gravitational
   // ease back to rest. tune stiffness/damping for how the upright settle feels.
   const rotateTarget = useMotionValue(baseRotation);
@@ -130,8 +175,16 @@ function StickyNote({
   // natural hang angle gravity pulls toward while held - set fresh on each grab
   // from WHERE you grabbed (not the dropped angle), so pickup feels natural.
   const gravityRest = useRef(0);
+  // tracks trash-hover so we only re-animate on enter/leave, not every drag frame
+  const overTrash = useRef(false);
+
+  /** @description Is the pointer currently inside the trash hitbox? */
+  function pointerOverTrash(info: PanInfo): boolean {
+    return pointInRect(info.point.x, info.point.y, trashRef.current?.getBoundingClientRect());
+  }
 
   function handleDragStart(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
+    void animate(scale, 1.06, { duration: 0.15 });
     // which third did you grab? left -> hangs right, right -> hangs left, middle
     // -> straight. like pinching a heavy square by a corner and letting it dangle.
     const rect = noteRef.current?.getBoundingClientRect();
@@ -144,17 +197,29 @@ function StickyNote({
     // natural hang (grab middle = upright), not to wherever it was last dropped.
     const lean = clamp(info.velocity.x / LEAN_VELOCITY, -1, 1) * LEAN_MAX_DEG;
     rotateTarget.set(clamp(gravityRest.current + lean, -FROZEN_ANGLE_CAP, FROZEN_ANGLE_CAP));
+
+    // dock-magnet: shrink small over the trash, pop back to grab size when off it
+    const over = pointerOverTrash(info);
+    if (over !== overTrash.current) {
+      overTrash.current = over;
+      onTrashHover(over);
+      void animate(scale, over ? 0.4 : 1.06, { type: "spring", stiffness: 400, damping: 26 });
+    }
   }
 
   function handleDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
     // freeze at the exact angle it's displaying right now so it sticks as-is
     const frozen = clamp(rotate.get(), -FROZEN_ANGLE_CAP, FROZEN_ANGLE_CAP);
     rotateTarget.set(frozen);
+    onTrashHover(false);
 
-    if (pointInRect(info.point.x, info.point.y, trashRef.current?.getBoundingClientRect())) {
+    if (pointerOverTrash(info)) {
       onTrash(rant.id);
       return;
     }
+
+    overTrash.current = false;
+    void animate(scale, 1, { type: "spring", stiffness: 300, damping: 26 });
 
     // convert the drag offset back into a 0-1 canvas fraction and persist it
     const rect = constraintsRef.current?.getBoundingClientRect();
@@ -169,7 +234,15 @@ function StickyNote({
     <motion.div
       ref={noteRef}
       className={styles.note}
-      style={{ left: `${xFrac * 100}%`, top: `${yFrac * 100}%`, background: color, x, y, rotate }}
+      style={{
+        left: `${xFrac * 100}%`,
+        top: `${yFrac * 100}%`,
+        background: color,
+        x,
+        y,
+        rotate,
+        scale,
+      }}
       drag
       dragConstraints={constraintsRef}
       dragElastic={0.08}
@@ -177,8 +250,15 @@ function StickyNote({
       onDragStart={handleDragStart}
       onDrag={handleDrag}
       onDragEnd={handleDragEnd}
-      whileDrag={{ scale: 1.07, zIndex: 50, cursor: "grabbing" }}>
-      <p className={styles.noteText} style={{ fontSize: noteFontSize(rant.text.length) }}>
+      whileDrag={{ zIndex: 50, cursor: "grabbing" }}>
+      <p
+        className={styles.noteText}
+        style={{
+          fontSize: noteFontSize(rant.text.length),
+          lineHeight: noteLineHeight(rant.text.length),
+
+          padding: noteInnerPadding(rant.text.length),
+        }}>
         {rant.text}
       </p>
       <span className={styles.noteAuthor}>{rant.name || "anon"}</span>
@@ -221,7 +301,7 @@ function ComposePad({ nextColor, onStick }: ComposePadProps) {
     // whole pad starts small and scales up when you focus it to write
     <motion.div
       className={styles.pad}
-      animate={{ scale: peeled ? 1.15 : 1 }}
+      animate={{ scale: peeled ? 1.1 : 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 24 }}>
       {/* stacked blanks behind for pad depth */}
       <div className={styles.padBack} aria-hidden style={{ rotate: "-3deg" }} />
@@ -280,6 +360,8 @@ interface StickyBoardProps {
 export function StickyBoard({ rants, addRant, updatePlacement, deleteRant }: StickyBoardProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   const trashRef = useRef<HTMLDivElement>(null);
+  // true while a dragged note is hovering the trash - arms the can's visual state
+  const [trashArmed, setTrashArmed] = useState(false);
 
   // the color cycle is a session cursor: it seeds once from the newest existing
   // note (so a returning visitor continues the loop), then only ever advances
@@ -322,13 +404,17 @@ export function StickyBoard({ rants, addRant, updatePlacement, deleteRant }: Sti
             trashRef={trashRef}
             onCommit={updatePlacement}
             onTrash={deleteRant}
+            onTrashHover={setTrashArmed}
           />
         );
       })}
 
       <ComposePad nextColor={nextColor} onStick={handleStick} />
 
-      <div className={styles.trash} ref={trashRef} aria-label="drag a note here to trash it">
+      <div
+        className={`${styles.trash} ${trashArmed ? styles.trashArmed : ""}`}
+        ref={trashRef}
+        aria-label="drag a note here to trash it">
         🗑️
       </div>
     </div>

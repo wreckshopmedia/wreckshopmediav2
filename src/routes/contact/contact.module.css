@@ -37,7 +37,7 @@
 /* bottom center: social icon row, below the nav */
 .socialRow {
   position: absolute;
-  top: clamp(320px, calc(90% + 8vh), 340px);
+  top: clamp(290px, calc(50% + 10vh + 10vw), 353px);
   left: 50%;
   translate: -50% 0;
   display: flex;

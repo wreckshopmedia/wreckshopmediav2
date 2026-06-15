@@ -19,7 +19,8 @@
 .note {
   container-type: inline-size;
   position: absolute;
-  width: clamp(110px, 15vw, 165px);
+  /* locked square at any screen size; can shrink small (text goes unreadable, ok for now) */
+  width: clamp(80px, 15vw, 165px);
   aspect-ratio: 1;
   padding: 1em 0.9em;
   box-sizing: border-box;
@@ -58,13 +59,18 @@
 
 /* the pad in the bottom-right corner - peel a blank from here. tilted like a
    real pad tossed on a desk. */
+/* parked right of the logo, a bit above the horizon line - the clean central
+   zone most pages will target. nudge left/top to taste. */
+/* dead center horizontally (over the boat/tree logo), parked above the horizon.
+   translate centers it on its own width; rotate + motion's scale compose on top. */
 .pad {
   position: absolute;
-  right: 1.2em;
-  bottom: 1.2em;
-  width: clamp(150px, 20vw, 210px);
+  left: 50%;
+  top: 28%;
+  translate: -50% 0;
+  width: clamp(175px, 24vw, 250px);
   aspect-ratio: 1;
-  rotate: -3deg;
+  rotate: -5deg;
   z-index: 30;
   pointer-events: auto;
 }
@@ -112,7 +118,7 @@
     font-family: var(--body);
     font-size: max(5cqi, 11px);
     font-weight: 300;
-    opacity: 0.5;
+    opacity: 0.65;
   }
 }
 

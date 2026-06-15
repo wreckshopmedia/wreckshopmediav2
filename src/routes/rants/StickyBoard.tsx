@@ -5,19 +5,29 @@ import type { Rant } from "../../hooks/useRants";
 import { scratchpad } from "../../utils/scratchpad";
 import styles from "./stickyBoard.module.css";
 
-// placeholder palette - Mo will swap in richer colors. order + length must match
-// the server's PALETTE_SIZE so stored color indices line up.
-const NOTE_COLORS = ["#fef08a", "#fda4af", "#a7f3d0", "#bfdbfe", "#fed7aa"] as const;
+// the 5-color cycle. defined as theme vars in index.css (single source of truth).
+// order + length must match the server's PALETTE_SIZE so stored indices line up.
+const NOTE_COLORS = [
+  "var(--sticky-note-yellow)",
+  "var(--sticky-note-red)",
+  "var(--sticky-note-green)",
+  "var(--sticky-note-blue)",
+  "var(--sticky-note-peach)",
+] as const;
 
-const MAX_RANT_LENGTH = 240;
+const MAX_RANT_LENGTH = 180;
 
-// horizontal drag distance (px) that leans the note to the full angle. lean
-// tracks how far you've dragged sideways and HOLDS there (no gravity back to
-// straight) - drag back the other way to lean it the other direction.
-const LEAN_FULL_OFFSET = 200;
-const LEAN_MAX_DEG = 20;
+// drag velocity (px/s) that leans the note to the full angle. faster drag = more
+// lean; when you slow/stop it eases back upright (gravity), and on release it
+// freezes exactly at whatever angle it's at in that moment.
+const LEAN_VELOCITY = 200;
+const LEAN_MAX_DEG = 22;
 // hard ceiling on a note's frozen angle so repeated drags can never spin it silly
 const FROZEN_ANGLE_CAP = 26;
+// natural hang angle when grabbed off-center - grab the left third and it tilts
+// right (like pinching the top-left corner), right third tilts left, middle hangs
+// straight. this is the resting point gravity pulls toward while you hold it.
+const GRAB_LEAN_DEG = 11;
 
 /** @description Cheap stable hash of a rant id - sums char codes. */
 function hashId(id: string): number {
@@ -59,17 +69,17 @@ function seededLayout(id: string) {
 }
 
 /**
- * @description Picks a font-size clamp for the note text based on rant length -
- * a handful of words reads huge, a wall of text shrinks to fit the square. Each
- * clamp is (floor px, cqi middle that scales with note size, ceiling px). Tweak
- * the tiers / breakpoints freely. Max length is MAX_RANT_LENGTH.
+ * @description Picks a font-size for the note text based on rant length - a
+ * handful of words reads huge, a wall of text shrinks to fit the square. Pure
+ * cqi (no clamp/floor) so it scales straight off the note's own width as the
+ * container; tiny notes go fully unreadable on purpose. Tweak tiers freely.
  */
 function noteFontSize(len: number): string {
-  if (len <= 12) return "clamp(20px, 16cqi, 34px)"; // super short - go big
-  if (len <= 30) return "clamp(15px, 12cqi, 23px)";
-  if (len <= 80) return "clamp(12px, 8.5cqi, 16px)";
-  if (len <= 140) return "clamp(10px, 7cqi, 13px)";
-  return "clamp(9px, 5.5cqi, 11px)";
+  if (len <= 12) return "16cqi"; // super short - go big
+  if (len <= 30) return "12cqi";
+  if (len <= 80) return "8.5cqi";
+  if (len <= 140) return "7cqi";
+  return "5.5cqi";
 }
 
 /** @description True if a page-space point falls inside the given element's box. */
@@ -110,25 +120,35 @@ function StickyNote({
   onCommit,
   onTrash,
 }: StickyNoteProps) {
+  const noteRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  // rotateTarget is the angle we steer toward; the spring smooths it for display
+  // rotateTarget is the angle we steer toward; the spring gives the gravitational
+  // ease back to rest. tune stiffness/damping for how the upright settle feels.
   const rotateTarget = useMotionValue(baseRotation);
-  const rotate = useSpring(rotateTarget, { stiffness: 300, damping: 28 });
-  // the angle the note is "stuck" at between drags - lean is added on top
-  const frozenAngle = useRef(baseRotation);
+  const rotate = useSpring(rotateTarget, { stiffness: 170, damping: 24 });
+  // natural hang angle gravity pulls toward while held - set fresh on each grab
+  // from WHERE you grabbed (not the dropped angle), so pickup feels natural.
+  const gravityRest = useRef(0);
+
+  function handleDragStart(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
+    // which third did you grab? left -> hangs right, right -> hangs left, middle
+    // -> straight. like pinching a heavy square by a corner and letting it dangle.
+    const rect = noteRef.current?.getBoundingClientRect();
+    const zone = rect ? (info.point.x - rect.left) / rect.width : 0.5;
+    gravityRest.current = zone < 0.34 ? GRAB_LEAN_DEG : zone > 0.66 ? -GRAB_LEAN_DEG : 0;
+  }
 
   function handleDrag(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
-    // lean tracks horizontal distance dragged from the grab point and holds it -
-    // no decay back to straight. offset.x resets to 0 each new grab.
-    const lean = clamp(info.offset.x / LEAN_FULL_OFFSET, -1, 1) * LEAN_MAX_DEG;
-    rotateTarget.set(clamp(frozenAngle.current + lean, -FROZEN_ANGLE_CAP, FROZEN_ANGLE_CAP));
+    // velocity lean stacks on the grab-based hang; when you stop it settles to that
+    // natural hang (grab middle = upright), not to wherever it was last dropped.
+    const lean = clamp(info.velocity.x / LEAN_VELOCITY, -1, 1) * LEAN_MAX_DEG;
+    rotateTarget.set(clamp(gravityRest.current + lean, -FROZEN_ANGLE_CAP, FROZEN_ANGLE_CAP));
   }
 
   function handleDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
-    // freeze at the current leaned angle (capped) so it stays cockeyed where dropped
-    const frozen = clamp(rotateTarget.get(), -FROZEN_ANGLE_CAP, FROZEN_ANGLE_CAP);
-    frozenAngle.current = frozen;
+    // freeze at the exact angle it's displaying right now so it sticks as-is
+    const frozen = clamp(rotate.get(), -FROZEN_ANGLE_CAP, FROZEN_ANGLE_CAP);
     rotateTarget.set(frozen);
 
     if (pointInRect(info.point.x, info.point.y, trashRef.current?.getBoundingClientRect())) {
@@ -147,12 +167,14 @@ function StickyNote({
 
   return (
     <motion.div
+      ref={noteRef}
       className={styles.note}
       style={{ left: `${xFrac * 100}%`, top: `${yFrac * 100}%`, background: color, x, y, rotate }}
       drag
       dragConstraints={constraintsRef}
       dragElastic={0.08}
       dragMomentum={false}
+      onDragStart={handleDragStart}
       onDrag={handleDrag}
       onDragEnd={handleDragEnd}
       whileDrag={{ scale: 1.07, zIndex: 50, cursor: "grabbing" }}>
@@ -196,14 +218,18 @@ function ComposePad({ nextColor, onStick }: ComposePadProps) {
   }
 
   return (
-    <div className={styles.pad}>
+    // whole pad starts small and scales up when you focus it to write
+    <motion.div
+      className={styles.pad}
+      animate={{ scale: peeled ? 1.15 : 1 }}
+      transition={{ type: "spring", stiffness: 300, damping: 24 }}>
       {/* stacked blanks behind for pad depth */}
       <div className={styles.padBack} aria-hidden style={{ rotate: "-3deg" }} />
       <div className={styles.padBack} aria-hidden style={{ rotate: "2deg" }} />
       <motion.div
         className={styles.composeNote}
         style={{ background: nextColor }}
-        animate={peeled ? { rotate: -2, y: -10, scale: 1.03 } : { rotate: 0, y: 0, scale: 1 }}
+        animate={peeled ? { rotate: -2, y: -8 } : { rotate: 0, y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 22 }}>
         <textarea
           className={styles.composeTextarea}
@@ -231,7 +257,7 @@ function ComposePad({ nextColor, onStick }: ComposePadProps) {
           )}
         </div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }
 

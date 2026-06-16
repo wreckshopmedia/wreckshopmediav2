@@ -34,34 +34,12 @@
   }
 }
 
-/* bottom center: social icon row, below the nav */
-.socialRow {
+/* bottom center: positions the social icon row below the nav. just an anchor -
+   SocialRow owns the row's internal layout, spacing, and animation. */
+.socialAnchor {
   position: absolute;
   top: clamp(290px, calc(50% + 10vh + 10vw), 353px);
   left: 50%;
   translate: -50% 0;
-  display: flex;
-  gap: min(1.75rem, 6vw);
-  align-items: center;
-  justify-content: center;
-  width: 85%;
   pointer-events: auto;
-}
-
-/* placeholder until Mo drops in real icons */
-.socialPlaceholder {
-  font-family: var(--body);
-  font-size: clamp(12px, 1.5cqi, 13px);
-  font-weight: 400;
-  color: color(from var(--color-text-title) srgb r g b / 0.8);
-  text-decoration: none;
-  letter-spacing: 0.08em;
-  text-decoration: underline;
-  text-decoration-color: color(from var(--color-text-title) srgb r g b / 0.4);
-  text-underline-offset: 0.09em;
-
-  &:hover {
-    text-decoration-color: color(from var(--color-text-title) srgb r g b / 1);
-    color: color(from var(--color-text-title) srgb r g b / 1);
-  }
 }

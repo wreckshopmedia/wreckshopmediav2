@@ -1,8 +1,10 @@
+import { SocialRow } from "../../components/socialRow/SocialRow";
 import styles from "./contact.module.css";
 
 /**
- * @description Contact page. Top center has a short blurb and email. Bottom
- * center holds a social icon row (icons TBD - Mo is selecting these).
+ * @description Contact page. Top center has a short blurb and email; the social
+ * icon row sits centered below the nav. See SocialRow for the icons' drunk-wander
+ * + magnet hover behavior.
  * @author Chris "Mo" Mochinski
  */
 export function Contact() {
@@ -17,38 +19,9 @@ export function Contact() {
         </a>
       </div>
 
-      <div className={styles.socialRow}>
-        {/* icons coming - Mo selecting these */}
-        <a
-          target="_blank"
-          href="https://github.com/chrismochinski"
-          className={styles.socialPlaceholder}>
-          my github
-        </a>
-        <a
-          target="_blank"
-          href="https://github.com/wreckshopmedia"
-          className={styles.socialPlaceholder}>
-          wsm github
-        </a>
-        <a
-          target="_blank"
-          href="https://www.linkedin.com/in/chrismochinski"
-          className={styles.socialPlaceholder}>
-          linkedin
-        </a>
-        <a
-          target="_blank"
-          href="https://instagram.com/chrismochinski"
-          className={styles.socialPlaceholder}>
-          instagram
-        </a>
-        <a
-          target="_blank"
-          href="https://www.backstage.com/u/chris-mo-mochinski/"
-          className={styles.socialPlaceholder}>
-          backstage
-        </a>
+      {/* page-level anchor only - SocialRow owns the icon layout + animation */}
+      <div className={styles.socialAnchor}>
+        <SocialRow />
       </div>
     </>
   );

@@ -1,0 +1,61 @@
+/* the inner flex row of the seven icons. the contact page owns where this sits;
+   here we only own the icon layout + spacing. overflow visible so a hovered
+   icon's scribble ring + magnet reach aren't clipped. */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.9rem, 2vw, 1.25rem);
+  overflow: visible;
+}
+
+/* each icon's hit area + color source - currentColor drives the svg fill, so
+   hover is just a color shift. the padding gives the magnet room to reach. */
+.iconLink {
+  display: block;
+  padding: 0.55em;
+  color: color(from var(--color-text-title) srgb r g b / 0.6);
+  transition: color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover {
+    color: var(--color-text-title);
+  }
+}
+
+/* the layer the magnet offset rides on - keeps the wander animating underneath
+   on its own layer so the two transforms never fight. */
+.magInner {
+  position: relative;
+  display: block;
+  will-change: transform;
+}
+
+/* the icon box - sizing lives here (CSS wins over the svg's width/height attrs),
+   keeping all seven squares small enough to share the one viewport. */
+.iconGlyph {
+  display: block;
+  width: clamp(1.5rem, 2.2vw, 2rem);
+  height: clamp(1.5rem, 2.2vw, 2rem);
+  will-change: transform;
+
+  & svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* the hand-drawn scribble ring - sized a bit bigger than the glyph, centered,
+   and allowed to spill past the icon box. inky pencil color via currentColor. */
+.scribble {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 185%;
+  height: 185%;
+  translate: -50% -50%;
+  color: color(from var(--stroke-black) srgb r g b / 0.7);
+  pointer-events: none;
+  overflow: visible;
+}

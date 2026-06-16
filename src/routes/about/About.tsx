@@ -1,3 +1,4 @@
+import { Plant } from "../../components/Plant/plantIndex";
 import styles from "./about.module.css";
 
 /**
@@ -8,6 +9,14 @@ import styles from "./about.module.css";
 export function About() {
   return (
     <>
+      {/* POC: a couple plants sprout on route enter (remount = fresh grow) */}
+      <div className={styles.plantLeft}>
+        <Plant />
+      </div>
+      <div className={styles.plantRight}>
+        <Plant delay={0.3} growDuration={1.7} />
+      </div>
+
       <div className={styles.aboutBlurb}>
         <div className={styles.aboutBlurbTextWrapper}>
           <p>

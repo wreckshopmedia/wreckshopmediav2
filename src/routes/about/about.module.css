@@ -1,3 +1,21 @@
+/* POC plants - sprout near the horizon, flanking. nudge offsets to taste. */
+.plantLeft,
+.plantRight {
+  position: absolute;
+  bottom: 53px; /* > revisit */
+  pointer-events: none;
+}
+
+.plantLeft {
+  left: clamp(7rem, 20vw, 13rem);
+}
+
+/* flipped so the pair isn't identical; slightly later so they sprout in sequence */
+.plantRight {
+  right: clamp(7rem, 20vw, 13rem);
+  transform: scaleX(-1);
+}
+
 .aboutBlurb {
   position: absolute;
   bottom: clamp(100px, calc(8% + 18dvh), 499px);

@@ -2,7 +2,7 @@
    is the driver; width follows the viewBox aspect. block sizing in dvh so it
    never blows past a short viewport (no-scroll site). */
 .plant {
-  height: clamp(80px, 16dvh, 170px);
+  height: clamp(56px, 11dvh, 120px);
   width: auto;
   overflow: visible;
   pointer-events: none;

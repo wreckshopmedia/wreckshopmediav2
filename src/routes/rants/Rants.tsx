@@ -13,7 +13,9 @@ import { StickyBoard } from "./rantsIndex";
  * @author Chris "Mo" Mochinski
  */
 export function Rants() {
-  const { rants, addRant, updatePlacement, deleteRant } = useRants();
+  // deleteRant (hard delete) stays parked in the hook for a future admin-only view;
+  // the public board only ever soft-deletes via deleteRantSoft.
+  const { rants, addRant, updatePlacement, deleteRantSoft } = useRants();
 
   return (
     <>
@@ -23,7 +25,7 @@ export function Rants() {
         rants={rants}
         addRant={addRant}
         updatePlacement={updatePlacement}
-        deleteRant={deleteRant}
+        deleteRantSoft={deleteRantSoft}
       />
 
       {/* ---------- PARKED VIEWS (swap in if needed) ---------- */}

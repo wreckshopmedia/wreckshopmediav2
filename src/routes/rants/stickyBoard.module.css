@@ -20,7 +20,7 @@
   container-type: inline-size;
   position: absolute;
   /* locked square at any screen size; can shrink small (text goes unreadable, ok for now) */
-  width: clamp(80px, 18vw, 180px);
+  width: clamp(80px, 16vw, 160px);
   aspect-ratio: 1;
   padding-block: min(3cqi, 12px);
   padding-inline: min(5cqi, 16px);
@@ -46,6 +46,7 @@
   margin: 0;
   overflow: hidden;
   text-align: left;
+  text-wrap: pretty;
 }
 
 .noteAuthor {
@@ -56,7 +57,7 @@
   letter-spacing: 0.04em;
   color: color(from var(--color-text-sticky-note) srgb r g b / 0.65);
   align-self: flex-end;
-  /* margin-top: 0.4em; */
+  text-wrap: balance;
 
   /* signature dash - always before the name, with a hair of space */
   &::before {

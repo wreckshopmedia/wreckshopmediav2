@@ -46,13 +46,6 @@ export function SiteLayout() {
               the nav row without adding height to the centered navAnchor flow */}
           <div className={styles.navRowWrap}>
             <NavRow visible hillFlat />
-            <motion.p
-              className={styles.constructionNotice}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.7 }}
-              transition={{ duration: 0.5, delay: 0.6 }}>
-              notice: this site is very much under construction
-            </motion.p>
           </div>
 
           {/* canvas is inside navAnchor - zones offset from nav, not viewport corners */}
@@ -65,8 +58,16 @@ export function SiteLayout() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.35, ease: "easeIn" }}>
             <Outlet />
+
           </motion.main>
         </div>
+            <motion.p
+              className={styles.constructionNotice}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.9 }}
+              transition={{ duration: 0.5, delay: 0.6 }}>
+              notice: this site is very much under construction
+            </motion.p>
       </div>
     </RouteContext.Provider>
   );

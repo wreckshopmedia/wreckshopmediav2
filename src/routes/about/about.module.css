@@ -13,24 +13,45 @@
 /* flipped so the pair isn't identical; slightly later so they sprout in sequence */
 .plantRight {
   right: clamp(7rem, 20vw, 13rem);
-  transform: scaleX(-1);
 }
 
 .aboutBlurb {
   position: absolute;
-  bottom: clamp(100px, calc(8% + 18dvh), 499px);
-  left: 0;
-  max-width: clamp(200px, 37%, 320px);
+  text-wrap: pretty;
   pointer-events: auto;
-  transform: rotate(-7deg);
-
   .aboutBlurbTextWrapper {
-   display: flex;
+    display: flex;
     flex-direction: column;
+    text-wrap: pretty;
     gap: min(2cqi, 14px);
     p {
+      text-wrap: pretty;
+      font-weight: 200;
       color: var(--color-text-body);
       text-align: left;
+      
+      span.bizName {
+        text-wrap: pretty;
+        font-weight: 600;
+      }
+      &:first-letter {
+        
+        initial-letter: 2;
+        padding-right: 0.2em;
+      }
     }
+  }
+
+  &.leftBlurb {
+    bottom: clamp(100px, calc(8% + 18dvh), 499px);
+    left: 0;
+    max-width: clamp(200px, 37%, 320px);
+    transform: rotate(-7deg);
+  }
+  &.rightBlurb {
+    bottom: clamp(100px, calc(8% + 18dvh), 499px);
+    right: 0;
+    max-width: clamp(200px, 37%, 320px);
+    transform: rotate(7deg);
   }
 }

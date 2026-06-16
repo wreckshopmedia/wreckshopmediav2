@@ -113,9 +113,7 @@ export function useRants() {
    */
   const updatePlacement = useCallback(
     (id: string, posX: number, posY: number, rotation: number) => {
-      setRants((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, posX, posY, rotation } : r)),
-      );
+      setRants((prev) => prev.map((r) => (r.id === id ? { ...r, posX, posY, rotation } : r)));
       void fetch(`${API_BASE}/api/messages/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -136,5 +134,17 @@ export function useRants() {
     );
   }, []);
 
-  return { rants, loading, error, addRant, updatePlacement, deleteRant };
+  /**
+   * @description Sets note as "deleted" by updating new deleted boolean column
+   * @param id The ID of the rant to mark as deleted.
+   * @returns void
+   */
+  const deleteRantSoft = useCallback((id: string) => {
+    setRants((prev) => prev.filter((r) => r.id !== id));
+    void fetch(`${API_BASE}/api/messages/${id}/delete`, { method: "PATCH" }).catch((err) =>
+      scratchpad("[useRants] soft delete error →", err),
+    );
+  }, []);
+
+  return { rants, loading, error, addRant, updatePlacement, deleteRant, deleteRantSoft };
 }

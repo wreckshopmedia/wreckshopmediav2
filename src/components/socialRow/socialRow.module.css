@@ -52,10 +52,10 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 185%;
-  height: 185%;
+  width: 175%;
+  height: 175%;
   translate: -50% -50%;
-  color: color(from var(--stroke-black) srgb r g b / 0.7);
+  color: color(from var(--color-text-body) srgb r g b / 0.7);
   pointer-events: none;
   overflow: visible;
 }

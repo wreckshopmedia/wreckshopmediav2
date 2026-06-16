@@ -19,7 +19,6 @@ export function Contact() {
         </a>
       </div>
 
-      {/* page-level anchor only - SocialRow owns the icon layout + animation */}
       <div className={styles.socialAnchor}>
         <SocialRow />
       </div>

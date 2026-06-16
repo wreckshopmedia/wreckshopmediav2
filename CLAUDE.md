@@ -27,3 +27,25 @@ SO SIMPLE. This is a hard constraint:
 React + TypeScript + Vite + Motion (`motion/react`). Shared UI lives in
 `src/components/<Name>/` as a triad: `Name.tsx`, `name.module.css`, `nameIndex.ts` barrel.
 Inline SVG (as `motion.svg`/`motion.path`) for anything animated - see `components/Logo`.
+
+## Ideas & to-do
+
+Running list of intentions for the site - not yet built, don't lose these.
+
+### The "things" vs "stuff" routes
+
+The route names `things` and `stuff` are deliberately vague and Mo does not care that they're
+misleading. One becomes **personal projects** (just a few examples, not exhaustive); the other
+becomes a page about **what Mo uses and is proficient in** (tech/tools). Which name maps to
+which page is **TBD** - decide later, don't assume.
+
+### Credits & attributions section (on the "what I use" page)
+
+Most of the site is original art, assets, and ideas, but Mo does use some tools and takes some
+inspiration. The tech/proficiency page needs a small **credits & attributions** section to
+acknowledge those. Keep a running list as components borrow ideas:
+
+- **Plant component** - inspired by a CodePen project by **@Jimtonik** (https://codepen.io/Jimtonik).
+
+Add to this list whenever a component leans on someone else's work, and surface it all in that
+credits section when the page gets built.

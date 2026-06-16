@@ -3,7 +3,8 @@ USE AS THEME FILE!
 ------------------ */
 
 /* --------- IMPORT THEME FONTS (WIP) --------- */
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@300;400;500;600;700&family=Homemade+Apple&family=Outfit:wght@100..900&display=swap");
+
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Cormorant+SC:wght@300;400;500;600;700&family=Outfit:wght@100..900&display=swap');
 
 :root {
   /* --------------------------------------------------- */
@@ -28,30 +29,32 @@ USE AS THEME FILE!
   /* dark stuff  */
   --truer-black: #0e1012; /* use sparingly */
   --stroke-black: #182026;
-  --color-text-title: #423c38;
+  --color-text-title: #574F4C;
   --color-text-body: #050505;
-  --form-surface: #fbf8ef; /* form input bg - used with relative color opacity */
-
+  
+  
+  
   /* ------------------ OTHER VARS ------------------ */
-
+  
   --error-tomato: #fe654f;
-  --error-tomato-jam: #cc2936;
   --heading: "Cormorant SC", serif;
   --body: "Outfit", sans-serif;
-  --handwriting: "Homemade Apple", cursive;
-
+  --handwriting: "Caveat", cursive;
+  
   /* ------------ STICKY NOTE COLORS ------------ */
   /* the 5-color cycle for rant sticky notes. ORDER = the color index stored in
-     the DB, so keep exactly 5 and don't reorder casually. mix theme refs and new
-     hexes freely - e.g. --sticky-note-red references an existing theme color. */
-  --sticky-note-yellow: #fef08a;
+  the DB, so keep exactly 5 and don't reorder casually. mix theme refs and new
+  hexes freely - e.g. --sticky-note-red references an existing theme color. */
+  --sticky-note-yellow: #FFF988;
   --sticky-note-red: var(--error-tomato); /* theme ref - works great, tweak away */
-  --sticky-note-green: #a7f3d0;
-  --sticky-note-blue: #bfdbfe;
+  --sticky-note-green: #B3EFBD;
+  --sticky-note-blue: #AEF2FD;
   --sticky-note-peach: #fed7aa;
+  --color-text-sticky-note: #342F2D;
 
-  /* ------------------------------------------ */
-  /* ------------------------------------------ */
+
+  /* ----------------------------------------------- */
+  /* ----------------------------------------------- */
 
   color-scheme: light dark;
   font-synthesis: none;

@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
-import { Link, useLocation } from "react-router-dom";
-import { clsx } from "clsx";
+import { useLocation } from "react-router-dom";
+import { useHoverCapable } from "../../hooks/useHoverCapable";
+import { MagneticLink } from "./MagneticLink";
 import styles from "./navRow.module.css";
 
 // tunable h1 animation values
@@ -41,6 +42,7 @@ interface NavRowProps {
  */
 export function NavRow({ visible, hillFlat = false }: NavRowProps) {
   const { pathname } = useLocation();
+  const magnetic = useHoverCapable();
 
   const renderLink = (r: (typeof ALL_ROUTES)[number], i: number) => {
     const isActive = r.path === pathname;
@@ -58,9 +60,7 @@ export function NavRow({ visible, hillFlat = false }: NavRowProps) {
             ? { type: "tween", duration: 0.175, ease: "easeOut" }
             : { type: "spring", stiffness: 320, damping: 10 },
         }}>
-        <Link to={r.path} className={clsx(styles.routeLink, isActive && styles.activeLink)}>
-          {r.label}
-        </Link>
+        <MagneticLink to={r.path} label={r.label} isActive={isActive} magnetic={magnetic} />
       </motion.div>
     );
   };

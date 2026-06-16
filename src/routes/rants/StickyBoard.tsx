@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { animate, motion, useMotionValue, useSpring } from "motion/react";
+import { animate, motion, useMotionValue, useSpring, useTransform, useVelocity } from "motion/react";
 import type { PanInfo } from "motion/react";
 import type { Rant } from "../../hooks/useRants";
 import { scratchpad } from "../../utils/scratchpad";
@@ -17,17 +17,22 @@ const NOTE_COLORS = [
 
 const MAX_RANT_LENGTH = 200;
 
-// drag velocity (px/s) that leans the note to the full angle. faster drag = more
-// lean; when you slow/stop it eases back upright (gravity), and on release it
-// freezes exactly at whatever angle it's at in that moment.
-const LEAN_VELOCITY = 50;
-const LEAN_MAX_DEG = 30;
+// drag velocity (px/s) at which the note leans the full LEAN_MAX_DEG. real drags
+// run hundreds-to-thousands of px/s, so this has to be up here - set it too low
+// (the old 50) and every drag, slow or fast, instantly pins the clamp at max and
+// the speed signal is lost. when you slow/stop, useVelocity self-zeroes and the
+// note eases back to its hang (gravity); on release it freezes exactly as-is.
+const LEAN_VELOCITY = 2000;
+const LEAN_MAX_DEG = 100;
+// exponent on the normalized velocity. >1 means gentle moves barely tilt while
+// fast flings whip toward the max - this is what sells slow-vs-fast as different.
+const LEAN_EASE = 2;
 // hard ceiling on a note's frozen angle so repeated drags can never spin it silly
 const FROZEN_ANGLE_CAP = 30;
 // natural hang angle when grabbed off-center - grab the left third and it tilts
 // right (like pinching the top-left corner), right third tilts left, middle hangs
 // straight. this is the resting point gravity pulls toward while you hold it.
-const GRAB_LEAN_DEG = 11;
+const GRAB_LEAN_DEG = 15;
 
 /** @description Cheap stable hash of a rant id - sums char codes. */
 function hashId(id: string): number {
@@ -81,11 +86,11 @@ function seededLayout(id: string) {
  * @description Picks a font-size for the note text based on rant length
  */
 function noteFontSize(len: number): string {
-  if (len <= 12) return "20cqi"; // super short - go big
-  if (len <= 30) return "16cqi";
-  if (len <= 80) return "9.5cqi";
-  if (len <= 140) return "7.5cqi";
-  return "6cqi";
+  if (len <= 12) return "30cqi"; // super short - go big
+  if (len <= 30) return "21cqi";
+  if (len <= 80) return "13cqi";
+  if (len <= 140) return "11cqi";
+  return "9.5cqi";
 }
 
 /* TODO revisit line heights when more done */
@@ -94,11 +99,11 @@ function noteFontSize(len: number): string {
  * @description Picks a line-height for the note text based on rant length.
  */
 function noteLineHeight(len: number): string {
-  if (len <= 12) return "1.15em";
-  if (len <= 30) return "1.2em";
-  if (len <= 80) return "1.35em";
-  if (len <= 140) return "1.35em";
-  return "1.5em";
+  if (len <= 12) return "0.9em";
+  if (len <= 30) return "1em";
+  if (len <= 80) return "1em";
+  if (len <= 140) return "1em";
+  return "1.125em";
 }
 
 /**
@@ -106,13 +111,14 @@ function noteLineHeight(len: number): string {
  * Larger = a little padding. Small = not needed
  * This is probably partially due to dynamic line height
  * Note that this is INNER padding (on the text element itself)
+ * > 🚗 PARKED, may need adjustments later but, for now, ret 0
  */
 function noteInnerPadding(len: number): string {
-  if (len <= 12) return "0.3em 0.2em";
-  if (len <= 30) return "0.25em 0.15em";
-  if (len <= 80) return "0.25em 0.18em";
-  if (len <= 140) return "0.2em";
-  return "0.2em 0.15em";
+  if (len <= 12) return "0";
+  if (len <= 30) return "0";
+  if (len <= 80) return "0";
+  if (len <= 140) return "0";
+  return "0";
 }
 
 /* 
@@ -168,13 +174,34 @@ function StickyNote({
   const y = useMotionValue(0);
   // grab/drag scale - shrinks dock-style when held over the trash to telegraph the toss
   const scale = useMotionValue(1);
-  // rotateTarget is the angle we steer toward; the spring gives the gravitational
-  // ease back to rest. tune stiffness/damping for how the upright settle feels.
-  const rotateTarget = useMotionValue(baseRotation);
-  const rotate = useSpring(rotateTarget, { stiffness: 170, damping: 24 });
-  // natural hang angle gravity pulls toward while held - set fresh on each grab
-  // from WHERE you grabbed (not the dropped angle), so pickup feels natural.
-  const gravityRest = useRef(0);
+
+  // live horizontal drag velocity (px/s). useVelocity tracks the x motion value
+  // per frame and self-zeroes the instant the pointer stops moving - even while
+  // still held - so the lean always relaxes back to rest. (PanInfo.velocity only
+  // updates on movement, which would leave a fling-then-hold note stuck leaning.)
+  const xVel = useVelocity(x);
+  // 1 while held, 0 when parked - gates the velocity lean so a resting note ignores it
+  const dragging = useMotionValue(0);
+  // the angle gravity pulls toward: the grab-zone hang while held, or the frozen
+  // drop angle while parked. the speed lean is added on top of this.
+  const restAngle = useMotionValue(baseRotation);
+
+  // rotateTarget = rest + a speed-scaled lean. listed deps (NOT the bare-function
+  // form) so all three stay subscribed - the function form collects deps on its
+  // first run, where dragging=0 short-circuits before xVel is ever read, so the
+  // lean would never recompute. LEAN_EASE curves it: slow nudges barely tilt,
+  // fast flings whip toward the max.
+  const rotateTarget = useTransform([xVel, restAngle, dragging], ([v, rest, on]: number[]) => {
+    if (!on) return rest;
+    const norm = clamp(v / LEAN_VELOCITY, -1, 1);
+    const eased = Math.sign(norm) * Math.abs(norm) ** LEAN_EASE;
+    return clamp(rest + eased * LEAN_MAX_DEG, -FROZEN_ANGLE_CAP, FROZEN_ANGLE_CAP);
+  });
+  // underdamped (ratio ~0.5) so it doesn't just glide to rest - it overshoots once
+  // and swings back when you stop or change direction. that swing-back IS the
+  // whiplash; a critically-damped spring (the old 170/24) can't produce it.
+  const rotate = useSpring(rotateTarget, { stiffness: 200, damping: 12 });
+
   // tracks trash-hover so we only re-animate on enter/leave, not every drag frame
   const overTrash = useRef(false);
 
@@ -189,16 +216,13 @@ function StickyNote({
     // -> straight. like pinching a heavy square by a corner and letting it dangle.
     const rect = noteRef.current?.getBoundingClientRect();
     const zone = rect ? (info.point.x - rect.left) / rect.width : 0.5;
-    gravityRest.current = zone < 0.34 ? GRAB_LEAN_DEG : zone > 0.66 ? -GRAB_LEAN_DEG : 0;
+    restAngle.set(zone < 0.34 ? GRAB_LEAN_DEG : zone > 0.66 ? -GRAB_LEAN_DEG : 0);
+    dragging.set(1); // arm the velocity lean
   }
 
   function handleDrag(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
-    // velocity lean stacks on the grab-based hang; when you stop it settles to that
-    // natural hang (grab middle = upright), not to wherever it was last dropped.
-    const lean = clamp(info.velocity.x / LEAN_VELOCITY, -1, 1) * LEAN_MAX_DEG;
-    rotateTarget.set(clamp(gravityRest.current + lean, -FROZEN_ANGLE_CAP, FROZEN_ANGLE_CAP));
-
-    // dock-magnet: shrink small over the trash, pop back to grab size when off it
+    // the lean is fully reactive now (useVelocity -> rotateTarget -> spring), so
+    // all we still do per drag frame is the trash dock-magnet.
     const over = pointerOverTrash(info);
     if (over !== overTrash.current) {
       overTrash.current = over;
@@ -208,9 +232,12 @@ function StickyNote({
   }
 
   function handleDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
-    // freeze at the exact angle it's displaying right now so it sticks as-is
+    // freeze at the exact angle it's displaying right now so it sticks as-is. set
+    // rest first, then disarm, so rotateTarget lands on the frozen value with no
+    // intermediate frame snapping back to the grab-hang angle.
     const frozen = clamp(rotate.get(), -FROZEN_ANGLE_CAP, FROZEN_ANGLE_CAP);
-    rotateTarget.set(frozen);
+    restAngle.set(frozen);
+    dragging.set(0);
     onTrashHover(false);
 
     if (pointerOverTrash(info)) {
@@ -302,34 +329,44 @@ function ComposePad({ nextColor, onStick }: ComposePadProps) {
     <motion.div
       className={styles.pad}
       animate={{ scale: peeled ? 1.1 : 1 }}
-      transition={{ type: "spring", stiffness: 300, damping: 24 }}>
+      transition={{ type: "spring", stiffness: 800, damping: 17 }}>
       {/* stacked blanks behind for pad depth */}
-      <div className={styles.padBack} aria-hidden style={{ rotate: "-3deg" }} />
-      <div className={styles.padBack} aria-hidden style={{ rotate: "2deg" }} />
+      <div className={styles.padBack} aria-hidden style={{ rotate: "-2deg" }} />
+      <div className={styles.padBack} aria-hidden style={{ rotate: "3deg" }} />
       <motion.div
         className={styles.composeNote}
         style={{ background: nextColor }}
+        // peel stays up while focus is anywhere inside the pad (textarea OR name);
+        // only drops when focus leaves the whole note and there's no rant text yet
+        onFocus={() => setPeeled(true)}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget) && !text.trim()) setPeeled(false);
+        }}
         animate={peeled ? { rotate: -2, y: -8 } : { rotate: 0, y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 22 }}>
         <textarea
           className={styles.composeTextarea}
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, MAX_RANT_LENGTH))}
-          onFocus={() => setPeeled(true)}
-          onBlur={() => !text && setPeeled(false)}
           placeholder="scribble a rant..."
           rows={4}
           disabled={submitting}
         />
         <div className={styles.composeFooter}>
-          <input
-            className={styles.composeName}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="- name?"
-            maxLength={40}
-            disabled={submitting}
-          />
+          {/* fixed "-" prefix sits outside the input so it's always there, not editable */}
+          <span className={styles.nameField}>
+            <span className={styles.namePrefix} aria-hidden>
+              -
+            </span>
+            <input
+              className={styles.composeName}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="name?"
+              maxLength={35}
+              disabled={submitting}
+            />
+          </span>
           {text.trim() && (
             <button className={styles.stickButton} onClick={stickIt} disabled={submitting}>
               {submitting ? "..." : "stick it"}

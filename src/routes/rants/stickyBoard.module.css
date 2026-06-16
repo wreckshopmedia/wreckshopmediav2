@@ -49,13 +49,20 @@
 }
 
 .noteAuthor {
-  font-family: var(--body);
-  font-size: min(13cqi, 10px);
-  font-weight: 600;
+  font-family: var(--handwriting);
+  font-size: min(11cqi, 15px);
+  text-align: right;
+  font-weight: 500;
   letter-spacing: 0.04em;
-  color: color(from var(--color-text-title) srgb r g b / 0.7);
+  color: color(from var(--color-text-sticky-note) srgb r g b / 0.65);
   align-self: flex-end;
-  margin-top: 0.4em;
+  /* margin-top: 0.4em; */
+
+  /* signature dash - always before the name, with a hair of space */
+  &::before {
+    content: "-";
+    margin-right: 0.08em;
+  }
 }
 
 /* the pad in the bottom-right corner - peel a blank from here. tilted like a
@@ -67,7 +74,7 @@
 .pad {
   position: absolute;
   left: 50%;
-  top: 28%;
+  top: 34%;
   translate: -50% 0;
   width: clamp(150px, 20vw, 210px);
   aspect-ratio: 1;
@@ -81,7 +88,7 @@
   position: absolute;
   inset: 0;
   border-radius: 2px;
-  background: color(from var(--form-surface) srgb r g b / 0.9);
+  background: color(from var(--sky-tan) srgb r g b / 0.9);
   box-shadow: 0 2px 6px color(from var(--stroke-black) srgb r g b / 0.15);
 }
 
@@ -89,12 +96,12 @@
   container-type: inline-size;
   position: absolute;
   inset: 0;
-  padding: 1em 0.9em;
+  padding: 0.7em 0.9em;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   border-radius: 2px;
-  background: #fff8d6;
+  background: --light-tan;
   box-shadow:
     0 1px 1px color(from var(--stroke-black) srgb r g b / 0.12),
     0 8px 18px color(from var(--stroke-black) srgb r g b / 0.22);
@@ -110,14 +117,15 @@
   outline: none;
   resize: none;
   font-family: var(--handwriting);
-  font-size: max(8cqi, 12px);
-  line-height: 1.5em;
+  font-size: min(12cqi, 18px);
+  line-height: 1.3em;
   color: var(--color-text-title);
   box-sizing: border-box;
 
   &::placeholder {
-    font-family: var(--body);
-    font-size: max(5cqi, 11px);
+    font-family: var(--handwriting);
+    letter-spacing: 0.02em;
+    font-size: min(12cqi, 18px);
     font-weight: 300;
     opacity: 0.65;
   }
@@ -130,21 +138,45 @@
   gap: 0.4em;
 }
 
+/* groups the fixed "-" prefix with the name input so they read as one signature */
+.nameField {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.08em;
+}
+
+.namePrefix {
+  flex-shrink: 0;
+  font-family: var(--handwriting);
+  font-weight: 600;
+  font-size: min(12cqi, 18px);
+  color: color(from var(--color-text-title) srgb r g b / 0.7);
+}
+
+/* when the name is empty, fade the dash to match the fainter placeholder; once
+   you type, it pops back to full so it matches the typed name's opacity */
+.nameField:has(.composeName:placeholder-shown) .namePrefix {
+  opacity: 0.5;
+}
+
 .composeName {
   flex: 1;
   min-width: 0;
   background: transparent;
   border: none;
   outline: none;
+  font-weight: 600;
   font-family: var(--handwriting);
-  font-size: max(6cqi, 11px);
-  color: color(from var(--color-text-title) srgb r g b / 0.75);
+  font-size: min(12cqi, 18px);
+  color: color(from var(--color-text-title) srgb r g b / 0.65);
 
   &::placeholder {
-    font-family: var(--body);
-    font-size: max(4.5cqi, 10px);
-    font-weight: 300;
-    opacity: 0.5;
+    font-family: var(--handwriting);
+    font-size: min(12cqi, 18px);
+    font-weight: 500;
+    opacity: 0.7;
   }
 }
 
@@ -184,7 +216,7 @@
   justify-content: center;
   font-size: 1.4em;
   border-radius: 50%;
-  background: color(from var(--form-surface) srgb r g b / 0.55);
+  background: color(from var(--light-tan) srgb r g b / 0.55);
   border: 1px dashed color(from var(--color-text-title) srgb r g b / 0.35);
   z-index: 20;
   pointer-events: auto;

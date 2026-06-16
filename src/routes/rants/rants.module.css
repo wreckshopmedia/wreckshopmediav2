@@ -49,7 +49,7 @@
   font-size: clamp(13px, 1.4cqi, 15px);
   font-weight: 300;
   color: var(--color-text-body);
-  background: color(from var(--form-surface) srgb r g b / 0.67);
+  background: color(from var(--light-tan) srgb r g b / 0.67);
   border: 1px solid color(from var(--color-text-title) srgb r g b / 0.25);
   border-radius: 4px;
   box-sizing: border-box;
@@ -57,7 +57,7 @@
   backdrop-filter: blur(3px);
 
   &:focus {
-    background: color(from var(--form-surface) srgb r g b / 0.85);
+    background: color(from var(--light-tan) srgb r g b / 0.85);
     border-color: color(from var(--color-text-title) srgb r g b / 0.55);
   }
 
@@ -79,14 +79,14 @@
   font-size: clamp(12px, 1.2cqi, 13px);
   font-weight: 300;
   color: var(--color-text-body);
-  background: color(from var(--form-surface) srgb r g b / 0.67);
+  background: color(from var(--light-tan) srgb r g b / 0.67);
   border: 1px solid color(from var(--color-text-title) srgb r g b / 0.25);
   border-radius: 3px;
   outline: none;
   backdrop-filter: blur(3px);
 
   &:focus {
-    background: color(from var(--form-surface) srgb r g b / 0.85);
+    background: color(from var(--light-tan) srgb r g b / 0.85);
     border-color: color(from var(--color-text-title) srgb r g b / 0.55);
   }
 

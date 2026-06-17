@@ -1,52 +1,35 @@
-/* POC plants - sprout near the horizon, flanking. nudge offsets to taste. */
-.plantLeft,
-.plantRight {
-  position: absolute;
-  bottom: 53px; /* > revisit */
-  pointer-events: none;
-}
-
-.plantLeft {
-  left: clamp(7rem, 20vw, 13rem);
-}
-
-/* flipped so the pair isn't identical; slightly later so they sprout in sequence */
-.plantRight {
-  right: clamp(7rem, 20vw, 13rem);
-}
+/* plants now self-pin via the RootedPlant wrapper (drop + side + offset props) -
+   the hill-anchor logic lives there, not here. see components/Plant/RootedPlant. */
 
 .aboutBlurb {
+  top: 0;
   position: absolute;
   text-wrap: pretty;
   pointer-events: auto;
-  .aboutBlurbTextWrapper {
-    display: flex;
-    flex-direction: column;
+  
+  
+  p {
     text-wrap: pretty;
-    gap: min(2cqi, 14px);
-    p {
+    font-weight: 200;
+    color: var(--color-text-body);
+    text-align: left;
+
+    span.bizName {
       text-wrap: pretty;
-      font-weight: 200;
-      color: var(--color-text-body);
-      text-align: left;
-      
-      span.bizName {
-        text-wrap: pretty;
-        font-weight: 600;
-      }
+      font-weight: 600;
+    }
+  }
+  &.leftBlurb {
+    p {
+      /* bottom: clamp(100px, calc(8% + 18dvh), 499px); */
+      left: 0;
+      max-width: clamp(200px, 37%, 320px);
+      transform: rotate(-7deg);
       &:first-letter {
-        
         initial-letter: 2;
         padding-right: 0.2em;
       }
     }
-  }
-
-  &.leftBlurb {
-    bottom: clamp(100px, calc(8% + 18dvh), 499px);
-    left: 0;
-    max-width: clamp(200px, 37%, 320px);
-    transform: rotate(-7deg);
   }
   &.rightBlurb {
     bottom: clamp(100px, calc(8% + 18dvh), 499px);

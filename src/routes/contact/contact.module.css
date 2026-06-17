@@ -1,7 +1,8 @@
-/* top center: short blurb + email, above the nav */
+/* upper-center: blurb + email, sitting above the nav cluster. canvas-relative now
+   (50% = nav center), parked in the top third - nudge `top` to taste. */
 .contactInfo {
   position: absolute;
-  bottom: calc(100% + 2rem);
+  top: 14%;
   left: 50%;
   translate: -50% 0;
   text-align: center;
@@ -34,11 +35,12 @@
   }
 }
 
-/* bottom center: positions the social icon row below the nav. just an anchor -
-   SocialRow owns the row's internal layout, spacing, and animation. */
+/* lower-center: positions the social icon row below the nav cluster. canvas-relative
+   (50% = nav center), parked in the bottom sixth - nudge `bottom` to taste. just an
+   anchor - SocialRow owns the row's internal layout, spacing, and animation. */
 .socialAnchor {
   position: absolute;
-  top: clamp(290px, calc(50% + 10vh + 10vw), 353px);
+  bottom: 16%;
   left: 50%;
   translate: -50% 0;
   pointer-events: auto;

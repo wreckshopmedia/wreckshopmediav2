@@ -2,6 +2,10 @@
    is the driver; width follows the viewBox aspect. block sizing in dvh so it
    never blows past a short viewport (no-scroll site). */
 .plant {
+  /* block (not the default inline) so there's no baseline descender gap under the
+     svg - the box height equals the svg height exactly, so any wrapper measuring
+     it (e.g. translate: -100% to base-align) lines up regardless of plant size. */
+  display: block;
   height: clamp(56px, 11dvh, 120px);
   width: auto;
   overflow: visible;

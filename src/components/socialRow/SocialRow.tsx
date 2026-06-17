@@ -398,7 +398,7 @@ const SOCIAL_LINKS: { label: string; href: string; Icon: () => React.ReactElemen
   { label: "GitHub", href: "https://github.com/chrismochinski", Icon: GithubIcon },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/chrismochinski", Icon: LinkedInIcon },
   { label: "Instagram", href: "https://instagram.com/chrismochinski", Icon: InstagramIcon },
-  { label: "CodePen", href: "#", Icon: CodepenIcon },
+  { label: "CodePen", href: "https://codepen.io/characterstrong", Icon: CodepenIcon },
   {
     label: "Backstage",
     href: "https://www.backstage.com/u/chris-mo-mochinski/",
@@ -406,7 +406,7 @@ const SOCIAL_LINKS: { label: string; href: string; Icon: () => React.ReactElemen
   },
   { label: "YouTube", href: "#", Icon: YouTubeIcon },
   { label: "X", href: "#", Icon: XIcon },
-  { label: "Facebook", href: "#", Icon: FacebookIcon },
+  { label: "Facebook", href: "https://facebook.com/chrismochinski", Icon: FacebookIcon },
 ];
 
 /**

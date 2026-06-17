@@ -158,3 +158,28 @@ p {
   line-height: 1.1em;
   text-wrap: pretty;
 }
+
+/*
+  ---------- dev-only debug bounds (flag: VITE_DEBUG_BOUNDS, see src/utils/flags.ts) ----------
+  applyDevFlags() sets data-debug-bounds on <html> when the flag is on. each shell box gets
+  its OWN hue + border so the nesting reads at a glance even where the fills overlap:
+    tomato  = #site-layout  (the full-viewport shell, outermost)
+    blue    = #nav-anchor   (the real coordinate canvas everything positions against)
+    green   = #main         (the per-route content layer, overlays nav-anchor 1:1)
+  these only ever match locally - production never sets the attribute, so they cost nothing live.
+*/
+html[data-debug-bounds] #site-layout {
+  background: rgba(255, 99, 71, 0.06); /* tomato */
+  outline: 1px dashed rgba(255, 99, 71, 0.55);
+  outline-offset: -1px;
+}
+html[data-debug-bounds] #nav-anchor {
+  background: rgba(30, 144, 255, 0.08); /* dodger blue - the placement origin */
+  outline: 1.5px dashed rgba(30, 144, 255, 0.75);
+  outline-offset: -1px;
+}
+html[data-debug-bounds] #main {
+  background: rgba(46, 204, 113, 0.08); /* green - route content layer */
+  outline: 1px solid rgba(46, 204, 113, 0.85);
+  outline-offset: -1px;
+}

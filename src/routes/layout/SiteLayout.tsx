@@ -14,9 +14,11 @@ const LOGO_ROUTE_FX: Record<string, { opacity: number; filter: string }> = {};
 const DEFAULT_LOGO_FX = { opacity: 1, filter: "blur(0px)" };
 
 /**
- * @description Full-viewport canvas for all non-landing routes. The navAnchor is
- * vertically centered and never moves. contentCanvas lives inside navAnchor so all
- * zone positions are relative to the nav, not the viewport edges.
+ * @description Full-viewport shell for all non-landing routes. The navAnchor is a
+ * bounded, viewport-centered pseudo-canvas (capped height, never scrolls) with the
+ * logo + nav cluster locked dead-center. contentCanvas overlays it 1:1, so every
+ * route positions content against this canvas (top:50% = nav center) and can use
+ * cqi/cqb to stay pinned responsively on both axes.
  * @author Chris "Mo" Mochinski
  */
 export function SiteLayout() {

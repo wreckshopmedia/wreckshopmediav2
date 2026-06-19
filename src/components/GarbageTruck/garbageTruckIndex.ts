@@ -1,0 +1,1 @@
+export { GarbageTruck } from "./GarbageTruck";

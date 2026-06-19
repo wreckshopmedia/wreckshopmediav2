@@ -1,8 +1,8 @@
 /*
   the canvas is a single capped region centered in the viewport. it's
   click-through (pointer-events: none) so empty space doesn't block the nav -
-  only the notes, pad, and trash catch the pointer. notes can be dragged anywhere
-  within it, freely overlapping other elements.
+  only the notes and pad catch the pointer. notes can be dragged anywhere within
+  it, freely overlapping other elements (the trash target now lives on the truck).
 */
 .canvas {
   position: fixed;
@@ -41,7 +41,7 @@
 .noteText {
   font-family: var(--handwriting);
   /* font-size: */ /* > FUNCTION DEFINITION */
-  /* line-height: 1.35em; */ /* > FUNCTION DEFINITION */
+  /* line-height: */ /* > FUNCTION DEFINITION */
   color: var(--color-text-title);
   margin: 0;
   overflow: hidden;
@@ -205,32 +205,5 @@
   }
 }
 
-/* trash target - bottom-left so it's clear of the pad. notes dropped here vanish */
-.trash {
-  position: absolute;
-  left: clamp(3rem, 5vw, 4rem);
-  bottom: clamp(2rem, 5vh, 3rem);
-  width: 2.4em;
-  height: 2.4em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.4em;
-  border-radius: 50%;
-  background: color(from var(--light-tan) srgb r g b / 0.55);
-  border: 1px dashed color(from var(--color-text-title) srgb r g b / 0.35);
-  z-index: 20;
-  pointer-events: auto;
-  transition:
-    transform 0.18s ease,
-    background 0.18s ease,
-    border-color 0.18s ease;
-
-  /* armed: a note is hovering, ready to be tossed - pop bigger + tomato glow */
-  &.trashArmed {
-    transform: scale(1.35);
-    background: color(from var(--error-tomato) srgb r g b / 0.85);
-    border-color: var(--error-tomato);
-    border-style: solid;
-  }
-}
+/* the trash target moved off the board and onto the garbage truck's hopper -
+   see components/GarbageTruck. the old corner-can styles lived here. */

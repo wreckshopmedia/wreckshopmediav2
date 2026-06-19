@@ -65,9 +65,12 @@ interface StickyNoteProps {
   yFrac: number;
   baseRotation: number;
   constraintsRef: React.RefObject<HTMLDivElement | null>;
-  trashRef: React.RefObject<HTMLDivElement | null>;
+  /** the truck's invisible hopper-hitbox rect - drop a note over it to toss it */
+  trashRef: React.RefObject<SVGRectElement | null>;
   onCommit: (id: string, xFrac: number, yFrac: number, rotation: number) => void;
   onTrash: (id: string) => void;
+  /** true only when the hopper can actually accept a note (truck parked) */
+  dropEnabled: boolean;
   /** fired while dragging when this note enters/leaves the trash hitbox */
   onTrashHover: (over: boolean) => void;
 }
@@ -91,6 +94,7 @@ export function StickyNote({
   trashRef,
   onCommit,
   onTrash,
+  dropEnabled,
   onTrashHover,
 }: StickyNoteProps) {
   const noteRef = useRef<HTMLDivElement>(null);
@@ -146,8 +150,9 @@ export function StickyNote({
 
   function handleDrag(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
     // the lean is fully reactive now (useVelocity -> rotateTarget -> spring), so
-    // all we still do per drag frame is the trash dock-magnet.
-    const over = pointerOverTrash(info);
+    // all we still do per drag frame is the hopper dock-magnet. only arms when the
+    // truck's actually parked - no point magnetizing toward a hopper that's away.
+    const over = dropEnabled && pointerOverTrash(info);
     if (over !== overTrash.current) {
       overTrash.current = over;
       onTrashHover(over);
@@ -164,7 +169,7 @@ export function StickyNote({
     dragging.set(0);
     onTrashHover(false);
 
-    if (pointerOverTrash(info)) {
+    if (dropEnabled && pointerOverTrash(info)) {
       onTrash(rant.id);
       return;
     }

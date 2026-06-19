@@ -6,7 +6,7 @@ import styles from "./navRow.module.css";
 
 // tunable h1 animation values
 const TITLE_SCALE_HERO = 1.0;      // landing / pre-reveal scale
-const TITLE_SCALE_NAV = 0.93;      // settled nav scale
+const TITLE_SCALE_NAV = 0.9;      // settled nav scale
 const TITLE_SPACING_HERO = "0.2em";
 const TITLE_SPACING_NAV = "0.12em";
 

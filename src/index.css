@@ -4,7 +4,7 @@ USE AS THEME FILE!
 
 /* --------- IMPORT THEME FONTS (WIP) --------- */
 
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Cormorant+SC:wght@300;400;500;600;700&family=Outfit:wght@100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Cormorant+SC:wght@300;400;500;600;700&family=Outfit:wght@100..900&display=swap");
 
 :root {
   /* --------------------------------------------------- */
@@ -29,27 +29,34 @@ USE AS THEME FILE!
   /* dark stuff  */
   --truer-black: #0e1012; /* use sparingly */
   --stroke-black: #182026;
-  --color-text-title: #574F4C;
+  --color-text-title: #574f4c;
   --color-text-body: #050505;
-  
+
+  /* other light candidates (move up if used) */
+  --light-tangerine: #fcac88;
+
+  /* other dark options (move up if used) */
+  --dark-tangerine: #dd6e42;
+  --dark-grape: #655a7c;
+  --dark-mahogany: #3c1518;
+
   /* ------------------ OTHER VARS ------------------ */
-  
+
   --error-tomato: #fe654f;
   --heading: "Cormorant SC", serif;
   --body: "Outfit", sans-serif;
   --handwriting: "Caveat", cursive;
-  
+
   /* ------------ STICKY NOTE COLORS ------------ */
   /* the 5-color cycle for rant sticky notes. ORDER = the color index stored in
   the DB, so keep exactly 5 and don't reorder casually. mix theme refs and new
   hexes freely - e.g. --sticky-note-red references an existing theme color. */
-  --sticky-note-yellow: #FFF988;
+  --sticky-note-yellow: #fff988;
   --sticky-note-red: var(--error-tomato); /* theme ref - works great, tweak away */
-  --sticky-note-green: #B3EFBD;
-  --sticky-note-blue: #AEF2FD;
+  --sticky-note-green: #b3efbd;
+  --sticky-note-blue: #aef2fd;
   --sticky-note-peach: #fed7aa;
-  --color-text-sticky-note: #342F2D;
-
+  --color-text-sticky-note: #342f2d;
 
   /* ----------------------------------------------- */
   /* ----------------------------------------------- */
@@ -182,4 +189,10 @@ html[data-debug-bounds] #main {
   background: rgba(46, 204, 113, 0.08); /* green - route content layer */
   outline: 1px solid rgba(46, 204, 113, 0.85);
   outline-offset: -1px;
+}
+/* reveal the truck's invisible hopper catch-zone so we can see/tune it. CSS beats the
+   rect's fillOpacity="0" presentation attr, so it lights up only while debugging. */
+html[data-debug-bounds] #hopper-hitbox {
+  fill: var(--error-tomato);
+  fill-opacity: 0.3;
 }

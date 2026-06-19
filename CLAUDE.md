@@ -49,3 +49,19 @@ acknowledge those. Keep a running list as components borrow ideas:
 
 Add to this list whenever a component leans on someone else's work, and surface it all in that
 credits section when the page gets built.
+
+### Garbage truck - window photo gag (deferred)
+
+The garbage truck (rants route trash mechanic) has the cab window built as a standalone
+`window-glass` group with the black interior behind it, leaving a slot between them. Mo wants to
+drop a **tiny, intentionally-pixelated, ~20-year-old photo** (an inside joke with friends) into
+that window space at some point - maybe triggered by some action. When building: render it in the
+black-to-glass gap and set `image-rendering: pixelated` so the browser never smooths the lo-fi
+look (the crustiness is the point). The window "roll-down" animation is still undecided.
+
+### Toggleable sound effects (absurdity mode)
+
+Add a React sound library (e.g. Howler or use-sound) for optional, **toggle-on** sound effects -
+truck engine/reverse beep on the rants route, a satisfying chomp/thunk when a note gets eaten,
+etc. Off by default, opt-in for maximum absurdity. Build AFTER the truck visuals + animations are
+done. Note: a sound lib is a new dependency, so clear it with Mo before adding.

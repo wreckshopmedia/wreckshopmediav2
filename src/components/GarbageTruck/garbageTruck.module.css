@@ -1,0 +1,121 @@
+/*
+  THE TRUCK STAGE. A bottom-left anchor that tracks the capped CONTENT box, not the
+  raw viewport - so on ultrawide/huge screens the truck rides the content's corner
+  instead of drifting off into the empty far corner (the bug the old corner-trash had).
+
+  the max() math: below the cap, (100vw - cap) goes negative so it clamps to 0 - the
+  truck sits in the real viewport bottom-left (grounded, what you want on sm/med). above
+  the cap, it offsets inward by half the leftover margin, landing on the content edge.
+  same trick on both axes. fixed + pointer-events:none so it never affects scroll/clicks.
+*/
+.stage {
+  --truck-cap-w: 1440px;
+  --truck-cap-h: 860px;
+  position: fixed;
+  left: max(0px, calc((100vw - var(--truck-cap-w)) / 2));
+  bottom: max(0px, calc((100svh - var(--truck-cap-h)) / 2));
+  width: min(100vw, var(--truck-cap-w));
+  pointer-events: none;
+  z-index: 40; /* above the note canvas (z:5) - truck reads as IN FRONT of the notes */
+}
+
+/* the moving piece - drive logic animates its x between parked (0) and off-screen.
+   width is the ONE size knob: clamp(floor, fluid, cap) so it scales with the viewport
+   but never gets tiny or huge. height follows the SVG's aspect via .art height:auto.
+   resizing is safe end-to-end: the hopper-hitbox lives in viewBox coords so it scales
+   with the art, and DOCK_X is a % of this width so the half-cut dock stays correct. */
+.truck {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: clamp(240px, 42vw, 580px);
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* the converted Figma SVG. width:100% fills .truck; height:auto keeps its intrinsic
+   1562x662 aspect so the wheels land on the road and nothing squashes. overflow:visible
+   overrides the SVG default (hidden) so the lever can swing past the viewBox at the peak
+   of its chomp without getting clipped at the edge. */
+.art {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/*
+  ---------- WHEEL SPIN ----------
+  spin each whole wheel GROUP (tire + hubcap together) while the truck travels.
+  :global so these match the literal ids inside the inlined SVG - CSS Modules would
+  otherwise scope #wheel-* and the selector would never hit. transform-box: fill-box
+  + transform-origin: center makes each group rotate about its OWN axle (its bbox
+  center), not the shared SVG origin.
+
+  NOTE: a plain symmetric hubcap will look nearly static even while spinning - that's
+  expected (no trackable feature). Add radial detail (lug bolts / spokes, concentric,
+  inside the wheel circle) to the wheel groups in Figma and it reads instantly, no
+  code change needed here.
+*/
+.art :global(#wheel-front),
+.art :global(#wheel-mid),
+.art :global(#wheel-rear) {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* distinct resting angles so the spokes don't all line up like a showroom - real
+   wheels stop wherever. these are the `rotate` property; the spin animates `transform`
+   (below), so they compose: at rest you see this offset, spinning = offset + a clean
+   full turn with no per-loop hitch. set these in code (not Figma) so they survive
+   re-exports - keep the wheels at 0deg in the art. */
+.art :global(#wheel-front) {
+  rotate: 17deg;
+}
+.art :global(#wheel-mid) {
+  rotate: -29deg;
+}
+.art :global(#wheel-rear) {
+  rotate: 53deg;
+}
+
+/* only while driving. heading flips direction: "in" rolls right, "out" rolls left. */
+.truck[data-driving][data-heading="in"] :global(#wheel-front),
+.truck[data-driving][data-heading="in"] :global(#wheel-mid),
+.truck[data-driving][data-heading="in"] :global(#wheel-rear) {
+  animation: truckWheelSpin 0.6s linear infinite;
+}
+.truck[data-driving][data-heading="out"] :global(#wheel-front),
+.truck[data-driving][data-heading="out"] :global(#wheel-mid),
+.truck[data-driving][data-heading="out"] :global(#wheel-rear) {
+  animation: truckWheelSpin 0.6s linear infinite reverse;
+}
+
+@keyframes truckWheelSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/*
+  ---------- LEVER CHOMP ----------
+  the chomp animation (WAAPI, in GarbageTruck.tsx) rotates #hopper-lever. view-box
+  transform-box makes transform-origin resolve in viewBox units, so we pivot about the
+  lever's actual joint (lever-pivot-point center, ~1438 319) instead of the SVG origin.
+*/
+.art :global(#hopper-lever) {
+  transform-box: view-box;
+  transform-origin: 1438px 319px;
+}
+
+/* reduced-motion: no spin (the truck also snaps in/out with no travel) */
+@media (prefers-reduced-motion: reduce) {
+  .truck :global(#wheel-front),
+  .truck :global(#wheel-mid),
+  .truck :global(#wheel-rear) {
+    animation: none;
+  }
+}

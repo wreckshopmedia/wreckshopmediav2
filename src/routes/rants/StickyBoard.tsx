@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Rant } from "../../hooks/useRants";
+import { useTruck } from "../../context/truckContextIndex";
 import { StickyNote } from "./StickyNote";
 import { ComposePad } from "./ComposePad";
 import { NOTE_COLORS, mod, colorIndexFor, seededLayout } from "./stickyHelpers";
@@ -16,16 +17,22 @@ interface StickyBoardProps {
  * @description Sticky-note canvas filling a single capped, centered region of the
  * viewport. Existing rants sit where they were dropped (stored as 0-1 fractions)
  * or scatter at a deterministic fallback spot if never placed; drag any one
- * anywhere - it sticks where dropped, persisting to the DB - or fling it onto the
- * trash to soft-delete it. The corner pad shows the next cycling color and lets
- * you scribble a new rant.
+ * anywhere - it sticks where dropped, persisting to the DB - or fling it into the
+ * garbage truck's hopper to soft-delete it. The corner pad shows the next cycling
+ * color and lets you scribble a new rant.
  * @author Chris "Mo" Mochinski
  */
 export function StickyBoard({ rants, addRant, updatePlacement, deleteRantSoft }: StickyBoardProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
-  const trashRef = useRef<HTMLDivElement>(null);
-  // true while a dragged note is hovering the trash - arms the can's visual state
-  const [trashArmed, setTrashArmed] = useState(false);
+  // the drop target is now the persistent garbage truck's hopper (up in SiteLayout).
+  // notes can only be tossed once it's parked; hover arms its lip via setHopperArmed.
+  const { compactorRef, parked, setHopperArmed, ingest } = useTruck();
+
+  // a successful toss: soft-delete the note AND tell the truck to chomp/swallow.
+  const tossIntoHopper = (id: string) => {
+    deleteRantSoft(id);
+    ingest();
+  };
 
   // the color cycle is a session cursor: it seeds once from the newest existing
   // note (so a returning visitor continues the loop), then only ever advances
@@ -65,22 +72,16 @@ export function StickyBoard({ rants, addRant, updatePlacement, deleteRantSoft }:
             yFrac={placed ? rant.posY! : layout.yFrac}
             baseRotation={rant.rotation ?? layout.tilt}
             constraintsRef={canvasRef}
-            trashRef={trashRef}
+            trashRef={compactorRef}
+            dropEnabled={parked}
             onCommit={updatePlacement}
-            onTrash={deleteRantSoft}
-            onTrashHover={setTrashArmed}
+            onTrash={tossIntoHopper}
+            onTrashHover={setHopperArmed}
           />
         );
       })}
 
       <ComposePad nextColor={nextColor} onStick={handleStick} />
-
-      <div
-        className={`${styles.trash} ${trashArmed ? styles.trashArmed : ""}`}
-        ref={trashRef}
-        aria-label="drag a note here to trash it">
-        🗑️
-      </div>
     </div>
   );
 }

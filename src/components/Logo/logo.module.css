@@ -1,5 +1,6 @@
 .logo {
-  max-width: clamp(105px, calc(70px + 12vw), 170px);
+  /* max-width: clamp(105px, calc(70px + 12vw), 170px); */
+  width: 170px;
   transition: filter 80ms ease-out;
   overflow: visible;
 }

@@ -2,12 +2,12 @@
    the hill-anchor logic lives there, not here. see components/Plant/RootedPlant. */
 
 .aboutBlurb {
-  top: 0;
+  top: 5vh;
   position: absolute;
   text-wrap: pretty;
   pointer-events: auto;
-  
-  
+  max-width: clamp(170px, 37%, 300px);
+
   p {
     text-wrap: pretty;
     font-weight: 200;
@@ -20,11 +20,9 @@
     }
   }
   &.leftBlurb {
+    left: min(60px, 5vw);
+    transform: rotate(-7deg);
     p {
-      /* bottom: clamp(100px, calc(8% + 18dvh), 499px); */
-      left: 0;
-      max-width: clamp(200px, 37%, 320px);
-      transform: rotate(-7deg);
       &:first-letter {
         initial-letter: 2;
         padding-right: 0.2em;
@@ -32,8 +30,7 @@
     }
   }
   &.rightBlurb {
-    bottom: clamp(100px, calc(8% + 18dvh), 499px);
-    right: 0;
+    right: min(30px, 3vw);
     max-width: clamp(200px, 37%, 320px);
     transform: rotate(7deg);
   }

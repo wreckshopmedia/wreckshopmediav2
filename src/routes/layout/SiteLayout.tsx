@@ -3,7 +3,9 @@ import { motion } from "motion/react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Logo } from "../../components/Logo/logoIndex";
 import { NavRow } from "../../components/NavRow/navRowIndex";
+import { GarbageTruck } from "../../components/GarbageTruck/garbageTruckIndex";
 import { RouteContext } from "../../context/routeContextIndex";
+import { TruckProvider } from "../../context/truckContextIndex";
 import { scratchpad } from "../../utils/scratchpad";
 import styles from "./siteLayout.module.css";
 
@@ -35,7 +37,11 @@ export function SiteLayout() {
 
   return (
     <RouteContext.Provider value={{ pathname }}>
-      <div className={styles.siteLayout} id="site-layout">
+      {/* TruckProvider wraps BOTH the route Outlet and the truck so the rants board
+          can hit-test the persistent truck's hopper. truck lives here (not in the
+          route) so it survives nav and can drive itself in/out freely. */}
+      <TruckProvider>
+        <div className={styles.siteLayout} id="site-layout">
         {/* navAnchor is the coordinate origin for all zone content */}
         <div className={styles.navAnchor} id="nav-anchor">
           <motion.div
@@ -70,7 +76,11 @@ export function SiteLayout() {
               transition={{ duration: 0.5, delay: 0.6 }}>
               notice: this site is very much under construction
             </motion.p>
-      </div>
+        </div>
+
+        {/* persistent across all shell routes - drives itself in on /rants, out elsewhere */}
+        <GarbageTruck />
+      </TruckProvider>
     </RouteContext.Provider>
   );
 }

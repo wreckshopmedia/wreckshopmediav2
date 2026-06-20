@@ -47,12 +47,13 @@
 }
 
 /* soft surround that fades in on approach and gets dragged along magnetically */
+/* TODO tweak these hover pills */
 .magPill {
   position: absolute;
   inset: -0.2em -0.55em;
-  border-radius: 999px;
-  background: color(from var(--light-blue) srgb r g b / 0.3);
-  border: 1px solid color(from var(--color-text-title) srgb r g b / 0.12);
+  border-radius: 0.5em;
+  background: color(from var(--light-blue) srgb r g b / 0);
+  border: 1px solid color(from var(--color-text-title) srgb r g b / 0.3);
   box-shadow: 0 2px 10px color(from var(--light-blue) srgb r g b / 0.25);
   z-index: 0;
   pointer-events: none;

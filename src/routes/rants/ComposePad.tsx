@@ -8,6 +8,8 @@ const MAX_RANT_LENGTH = 200;
 interface ComposePadProps {
   nextColor: string;
   onStick: (text: string, name: string) => Promise<boolean>;
+  /** advance the pad to the next color in the cycle (the sneaky corner button) */
+  onCycleColor: () => void;
 }
 
 /**
@@ -17,7 +19,7 @@ interface ComposePadProps {
  * On success the new rant flows back through useRants and lands automatically.
  * @author Chris "Mo" Mochinski
  */
-export function ComposePad({ nextColor, onStick }: ComposePadProps) {
+export function ComposePad({ nextColor, onStick, onCycleColor }: ComposePadProps) {
   const [text, setText] = useState("");
   const [name, setName] = useState("");
   const [peeled, setPeeled] = useState(false);
@@ -79,6 +81,18 @@ export function ComposePad({ nextColor, onStick }: ComposePadProps) {
               disabled={submitting}
             />
           </span>
+          {/* sneaky color-cycle button: advances the pad's color without sticking.
+              onMouseDown preventDefault so a click doesn't yank focus out of the note
+              (keeps the pad peeled while you hunt for a color). placeholder styling -
+              Mo will dress it up later. */}
+          <button
+            type="button"
+            className={styles.colorCycle}
+            onClick={onCycleColor}
+            onMouseDown={(e) => e.preventDefault()}
+            title="cycle note color"
+            aria-label="cycle to the next note color"
+          />
           {text.trim() && (
             <button className={styles.stickButton} onClick={stickIt} disabled={submitting}>
               {submitting ? "..." : "stick it"}

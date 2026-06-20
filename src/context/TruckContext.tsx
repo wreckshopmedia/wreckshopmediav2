@@ -19,7 +19,9 @@ interface TruckContextValue {
   setHopperArmed: (v: boolean) => void;
   /** bumped each time a note is tossed in - the truck watches it to chomp/swallow */
   ingestNonce: number;
-  ingest: () => void;
+  /** the color of the most recently tossed note - the swallow clone wears it */
+  ingestColor: string;
+  ingest: (color: string) => void;
 }
 
 const noop = () => {};
@@ -31,6 +33,7 @@ const TruckContext = createContext<TruckContextValue>({
   hopperArmed: false,
   setHopperArmed: noop,
   ingestNonce: 0,
+  ingestColor: "",
   ingest: noop,
 });
 
@@ -47,11 +50,24 @@ export function TruckProvider({ children }: { children: ReactNode }) {
   const [parked, setParked] = useState(false);
   const [hopperArmed, setHopperArmed] = useState(false);
   const [ingestNonce, setIngestNonce] = useState(0);
-  const ingest = useCallback(() => setIngestNonce((n) => n + 1), []);
+  const [ingestColor, setIngestColor] = useState("");
+  const ingest = useCallback((color: string) => {
+    setIngestColor(color);
+    setIngestNonce((n) => n + 1);
+  }, []);
 
   const value = useMemo(
-    () => ({ compactorRef, parked, setParked, hopperArmed, setHopperArmed, ingestNonce, ingest }),
-    [parked, hopperArmed, ingestNonce, ingest],
+    () => ({
+      compactorRef,
+      parked,
+      setParked,
+      hopperArmed,
+      setHopperArmed,
+      ingestNonce,
+      ingestColor,
+      ingest,
+    }),
+    [parked, hopperArmed, ingestNonce, ingestColor, ingest],
   );
 
   return <TruckContext.Provider value={value}>{children}</TruckContext.Provider>;

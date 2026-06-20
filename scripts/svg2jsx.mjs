@@ -52,6 +52,11 @@ svg = svg.replace(/<svg\b([^>]*)>/, (m, attrs) => {
   return `<svg className={className}${cleaned}>`;
 });
 
+// inject an empty swallow-layer as a sibling JUST BEFORE hopper-group, so tossed-note
+// clones (appended at runtime) paint behind the hopper face but in front of the body -
+// that's the "note disappears into the hopper" z-trick, via paint order alone.
+svg = svg.replace(/(<g id="hopper-group")/, `<g id="swallow-layer" />\n$1`);
+
 // inject the hopper-hitbox as first child of hopper-group (invisible -> paint order
 // irrelevant). ref so the rants board can measure it. coords in the 1562x662 viewBox.
 svg = svg.replace(

@@ -181,6 +181,29 @@
   }
 }
 
+/* sneaky little color-cycle button (bottom-right of the footer). placeholder look -
+   a small circle showing the current pad color, mild hover spin. dress up later. */
+.colorCycle {
+  flex-shrink: 0;
+  width: min(11cqi, 20px);
+  height: min(11cqi, 20px);
+  padding: 0;
+  border-radius: 50%;
+  border: 1.5px solid color(from var(--color-text-title) srgb r g b / 0.35);
+  background: color(from var(--color-text-title) srgb r g b / 0.07);
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    background 0.16s ease,
+    border-color 0.16s ease;
+
+  &:hover {
+    transform: scale(1.18) rotate(18deg);
+    background: color(from var(--color-text-title) srgb r g b / 0.15);
+    border-color: color(from var(--color-text-title) srgb r g b / 0.6);
+  }
+}
+
 .stickButton {
   flex-shrink: 0;
   padding: 0.3em 0.7em;

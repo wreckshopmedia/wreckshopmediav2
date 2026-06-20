@@ -727,6 +727,7 @@ export function GarbageTruckArt({ className, hitboxRef }: GarbageTruckArtProps) 
             </g>
           </g>
         </g>
+        <g id="swallow-layer" />
         <g id="hopper-group">
           <rect
             id="hopper-hitbox"

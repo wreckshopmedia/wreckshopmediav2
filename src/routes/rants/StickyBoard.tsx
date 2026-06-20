@@ -28,10 +28,11 @@ export function StickyBoard({ rants, addRant, updatePlacement, deleteRantSoft }:
   // notes can only be tossed once it's parked; hover arms its lip via setHopperArmed.
   const { compactorRef, parked, setHopperArmed, ingest } = useTruck();
 
-  // a successful toss: soft-delete the note AND tell the truck to chomp/swallow.
-  const tossIntoHopper = (id: string) => {
+  // a successful toss: soft-delete the note AND tell the truck to chomp/swallow,
+  // handing over the note's color so the swallowed clone matches what was tossed.
+  const tossIntoHopper = (id: string, color: string) => {
     deleteRantSoft(id);
-    ingest();
+    ingest(color);
   };
 
   // the color cycle is a session cursor: it seeds once from the newest existing
@@ -51,6 +52,9 @@ export function StickyBoard({ rants, addRant, updatePlacement, deleteRantSoft }:
   const nextColorIdx = cursor ?? 0;
   const nextColor = NOTE_COLORS[nextColorIdx];
 
+  // manually advance the pad's color without sticking a note - the sneaky cycle button.
+  const cycleColor = () => setCursor((c) => mod((c ?? 0) + 1, NOTE_COLORS.length));
+
   async function handleStick(text: string, name: string): Promise<boolean> {
     const ok = await addRant(text, name, nextColorIdx);
     if (ok) setCursor(mod(nextColorIdx + 1, NOTE_COLORS.length)); // advance only on success
@@ -62,12 +66,13 @@ export function StickyBoard({ rants, addRant, updatePlacement, deleteRantSoft }:
       {rants.map((rant) => {
         const layout = seededLayout(rant.id);
         const placed = rant.posX != null && rant.posY != null;
+        const noteColor = NOTE_COLORS[colorIndexFor(rant)];
         return (
           <StickyNote
             // key includes stored pos so committing a placement remounts cleanly
             key={`${rant.id}-${rant.posX ?? "s"}-${rant.posY ?? "s"}`}
             rant={rant}
-            color={NOTE_COLORS[colorIndexFor(rant)]}
+            color={noteColor}
             xFrac={placed ? rant.posX! : layout.xFrac}
             yFrac={placed ? rant.posY! : layout.yFrac}
             baseRotation={rant.rotation ?? layout.tilt}
@@ -75,13 +80,13 @@ export function StickyBoard({ rants, addRant, updatePlacement, deleteRantSoft }:
             trashRef={compactorRef}
             dropEnabled={parked}
             onCommit={updatePlacement}
-            onTrash={tossIntoHopper}
+            onTrash={() => tossIntoHopper(rant.id, noteColor)}
             onTrashHover={setHopperArmed}
           />
         );
       })}
 
-      <ComposePad nextColor={nextColor} onStick={handleStick} />
+      <ComposePad nextColor={nextColor} onStick={handleStick} onCycleColor={cycleColor} />
     </div>
   );
 }

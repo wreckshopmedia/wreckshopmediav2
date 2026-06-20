@@ -64,26 +64,12 @@
   transform-origin: center;
 }
 
-/* distinct resting angles so the spokes don't all line up like a showroom - real
-   wheels stop wherever. these are the `rotate` property; the spin animates `transform`
-   (below), so they compose: at rest you see this offset, spinning = offset + a clean
-   full turn with no per-loop hitch. set these in code (not Figma) so they survive
-   re-exports - keep the wheels at 0deg in the art. */
-.art :global(#wheel-front) {
-  rotate: 17deg;
-}
-.art :global(#wheel-mid) {
-  rotate: -29deg;
-}
-.art :global(#wheel-rear) {
-  rotate: 53deg;
-}
-
-/* the actual roll is a WAAPI animation in GarbageTruck.tsx (rollWheels) using the
-   drive's own easing + duration, so the wheels decelerate/accelerate WITH the truck
-   body rather than spinning at a constant rate and snap-stopping. it animates
-   `transform: rotate()`, which composes with the per-wheel `rotate` rest offset above.
-   reduced motion is honored there (the roll is skipped), so no CSS spin to gate. */
+/* the roll AND the per-wheel resting offset both live in a single WAAPI animation in
+   GarbageTruck.tsx (rollWheels) - it uses the drive's own easing/duration (so wheels
+   decelerate/accelerate WITH the truck body) and starts/ends on each wheel's offset
+   angle, held via commitStyles. keeping it all in one `transform` property is the snap
+   fix: there's no separate CSS `rotate` for the transform to fight. so nothing to set
+   here - keep the wheels at 0deg in the art; reduced motion is gated in the component. */
 
 /*
   ---------- LEVER CHOMP ----------

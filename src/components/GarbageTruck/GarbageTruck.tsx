@@ -92,9 +92,19 @@ const DRIVE = {
 };
 const cssBezier = (b: readonly number[]) => `cubic-bezier(${b[0]}, ${b[1]}, ${b[2]}, ${b[3]})`;
 
-// whole turns the wheels roll across one drive - integer so they end where they started
-// (seamless, no snap when the animation clears). more turns = faster spin; tune to taste.
+// whole turns the wheels roll across one drive (integer so each ends back at its rest
+// offset). more turns = faster spin; tune to taste.
 const WHEEL_TURNS = 3;
+
+// each wheel rests at its own angle so the spokes aren't showroom-aligned. the offset is
+// baked into the roll keyframes (start AND end here) and held via commitStyles - so it
+// all lives in the `transform` property. that's the snap fix: there's no separate CSS
+// `rotate` for the WAAPI transform to fight on the way in/out.
+const WHEELS = [
+  { sel: "#wheel-front", rest: 17 },
+  { sel: "#wheel-mid", rest: -29 },
+  { sel: "#wheel-rear", rest: 53 },
+];
 
 /**
  * @description The persistent garbage truck. Lives up in SiteLayout (NOT inside the
@@ -123,13 +133,24 @@ export function GarbageTruck() {
   const rollWheels = () => {
     if (!animationsEnabled) return;
     const phase = onRoute ? DRIVE.in : DRIVE.out;
-    const end = (onRoute ? 1 : -1) * WHEEL_TURNS * 360;
-    truckRef.current?.querySelectorAll("#wheel-front, #wheel-mid, #wheel-rear").forEach((w) =>
-      w.animate([{ transform: "rotate(0deg)" }, { transform: `rotate(${end}deg)` }], {
-        duration: phase.ms,
-        easing: cssBezier(phase.bezier),
-      }),
-    );
+    const dir = onRoute ? 1 : -1;
+    for (const { sel, rest } of WHEELS) {
+      const wheel = truckRef.current?.querySelector(sel);
+      if (!wheel) continue;
+      const anim = wheel.animate(
+        [
+          { transform: `rotate(${rest}deg)` },
+          { transform: `rotate(${rest + dir * WHEEL_TURNS * 360}deg)` },
+        ],
+        { duration: phase.ms, easing: cssBezier(phase.bezier), fill: "forwards" },
+      );
+      // bake the held end (visually = the rest offset) into inline style, then drop the
+      // animation - so it persists without snapping to 0 and without animations piling up.
+      anim.onfinish = () => {
+        anim.commitStyles();
+        anim.cancel();
+      };
+    }
   };
 
   // the instant we leave the route, lock the hopper so a note can't be tossed into a

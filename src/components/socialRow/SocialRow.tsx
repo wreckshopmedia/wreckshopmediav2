@@ -34,7 +34,7 @@ export function GithubIcon() {
 export function LinkedInIcon() {
   return (
     <motion.svg
-    id="linkedin-icon"
+      id="linkedin-icon"
       width="350"
       height="350"
       viewBox="0 0 350 350"
@@ -404,8 +404,8 @@ const SOCIAL_LINKS: { label: string; href: string; Icon: () => React.ReactElemen
     href: "https://www.backstage.com/u/chris-mo-mochinski/",
     Icon: BackstageIcon,
   },
-  { label: "YouTube", href: "#", Icon: YouTubeIcon },
-  { label: "X", href: "#", Icon: XIcon },
+  { label: "YouTube", href: "https://www.youtube.com/@wreckshopmedia", Icon: YouTubeIcon },
+  { label: "X", href: "https://x.com/thankpleasedev", Icon: XIcon },
   { label: "Facebook", href: "https://facebook.com/chrismochinski", Icon: FacebookIcon },
 ];
 

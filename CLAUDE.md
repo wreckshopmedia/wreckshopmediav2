@@ -50,14 +50,33 @@ acknowledge those. Keep a running list as components borrow ideas:
 Add to this list whenever a component leans on someone else's work, and surface it all in that
 credits section when the page gets built.
 
-### Garbage truck - window photo gag (deferred)
+### Easter eggs are a core value
 
-The garbage truck (rants route trash mechanic) has the cab window built as a standalone
-`window-glass` group with the black interior behind it, leaving a slot between them. Mo wants to
-drop a **tiny, intentionally-pixelated, ~20-year-old photo** (an inside joke with friends) into
-that window space at some point - maybe triggered by some action. When building: render it in the
-black-to-glass gap and set `image-rendering: pixelated` so the browser never smooths the lo-fi
-look (the crustiness is the point). The window "roll-down" animation is still undecided.
+Mo wants the site stuffed with **funky, weird easter eggs - and it's GOOD if they're rarely
+stumbled upon.** Rarity is a feature, not a bug: reward the curious, the wide-screen users, the
+people who click the thing nobody clicks. Don't gate delight behind common paths or water gags
+down so everyone sees them. When a component has a hidden corner, a rare viewport, or an
+overlooked element, that's an invitation - hide something silly there. Keep a running list here
+as ideas land, and lean absurd (see the per-route ambitions: each route should do something
+weird; rants is the current high-water mark).
+
+### Garbage truck - window photo gag + roll-down (deferred)
+
+The truck's cab window is a standalone `window-glass` group with the black interior behind it,
+leaving a slot between them. The gag: drop a **tiny, intentionally-pixelated, ~20-year-old photo**
+(inside joke) of a dude's face into that slot. How it works:
+
+- **SVG `<image href>`** holds the photo (inject via `scripts/svg2jsx.mjs`, like the hopper-hitbox
+  / swallow-layer - keep it a code/asset concern, not Figma art). `image-rendering: pixelated` so
+  the browser never smooths the lo-fi crust (the crustiness is the point).
+- **Paint order (back→front):** black interior → photo → glass → window trim/door edge. The glass
+  must sit BEHIND the trim so it reads as rolling *into the door*, and the photo sits behind the
+  glass so it's revealed as the glass drops.
+- **Roll-down:** animate `#window-glass` translateY down (the `WINDOW-GLASS-FRAME` clip tucks it
+  into the sill); click rolls it fully, a periodic ~20s low-amplitude peek flashes the face as a
+  hint.
+- **Naturally rare:** the window's on the cab, and the cab is the half that's cut off on most
+  screens (truck docks half-left) - so it's only visible on wide/ultrawide. The rarity is free.
 
 ### Toggleable sound effects (absurdity mode)
 

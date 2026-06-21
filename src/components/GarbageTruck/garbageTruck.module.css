@@ -81,3 +81,24 @@
   transform-box: view-box;
   transform-origin: 1438px 319px;
 }
+
+/*
+  ---------- CAB WINDOW EASTER EGG ----------
+  the photo keeps its lo-fi crunch (no smoothing on scale-up). the frame opts back INTO
+  pointer events (the stage/truck are pointer-events:none) so the window is clickable to
+  roll the glass down - it's a tiny cab-only target, so it never blocks note dragging.
+*/
+.art :global(#window-photo) {
+  image-rendering: pixelated;
+  /* zoom in a touch + nudge right. values are viewBox units, so they're locked to the
+     window at every screen size - the whole SVG scales as one, nothing shifts on resize.
+     the window frame's clip keeps the zoomed photo inside the opening. tune the two
+     numbers: scale = zoom, translateX = how far right. */
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: translateX(20px) scale(1.13);
+}
+.art :global(#WINDOW-GLASS-FRAME) {
+  pointer-events: auto;
+  cursor: pointer;
+}

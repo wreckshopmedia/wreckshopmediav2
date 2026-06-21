@@ -64,12 +64,23 @@ svg = svg.replace(
   `$1\n<rect id="hopper-hitbox" ref={hitboxRef} x="1120" y="0" width="442" height="600" fillOpacity={0} />`,
 );
 
+// inject the window easter-egg photo as the FIRST child of WINDOW-GLASS-FRAME: it's
+// clipped to the window opening (clip0 = 187,165 214x136) and sits BEHIND window-glass,
+// so it's hidden until the glass rolls down. href comes in as a prop (asset import lives
+// in GarbageTruck.tsx). preserveAspectRatio slice = fill the window, crop the overflow.
+svg = svg.replace(
+  /(<g id="WINDOW-GLASS-FRAME"[^>]*>)/,
+  `$1\n<image id="window-photo" href={photoSrc} x="187" y="165" width="214" height="136" preserveAspectRatio="xMidYMid meet" />`,
+);
+
 const file = `import type { Ref } from "react";
 
 interface GarbageTruckArtProps {
   className?: string;
   /** ref onto the invisible hopper-hitbox rect - sticky notes hit-test against this */
   hitboxRef: Ref<SVGRectElement>;
+  /** URL for the cab-window easter-egg photo (imported asset, passed from GarbageTruck) */
+  photoSrc: string;
 }
 
 /**
@@ -81,7 +92,7 @@ interface GarbageTruckArtProps {
  * re-run scripts/svg2jsx.mjs on a fresh export rather than hand-editing this file.
  * @author Chris "Mo" Mochinski
  */
-export function GarbageTruckArt({ className, hitboxRef }: GarbageTruckArtProps) {
+export function GarbageTruckArt({ className, hitboxRef, photoSrc }: GarbageTruckArtProps) {
   return (
 ${svg}
   );

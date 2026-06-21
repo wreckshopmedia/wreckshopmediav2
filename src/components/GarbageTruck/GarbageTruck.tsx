@@ -1,9 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { useRouteContext } from "../../context/routeContextIndex";
 import { useReducedMotion } from "../../context/ReducedMotionContext";
 import { useTruck } from "../../context/truckContextIndex";
 import { GarbageTruckArt } from "./GarbageTruckArt";
+import stevenSrc from "../../assets/steven-no-bg.png";
+import hotdogSrc from "../../assets/hotdog-no-bg.png";
 import styles from "./garbageTruck.module.css";
 
 // the route the truck is "for" - it reverses in here and drives away on leaving.
@@ -46,6 +48,55 @@ const SWALLOW_KEYFRAMES = [
 ];
 const SWALLOW_OPTIONS = { duration: 540, easing: "cubic-bezier(0.45, 0, 0.7, 0.35)" } as const;
 const SVG_NS = "http://www.w3.org/2000/svg";
+
+// the cab-window easter egg: roll #window-glass down (translateY, clipped by its frame so
+// it tucks into the sill) to reveal a photo behind it. a full reveal on click, plus a
+// randomized periodic "peek" (~halfway, ~1s hold) as a hint. distances in viewBox units
+// (window is 136 tall). only visible on wide screens where the cab shows - rarity is free.
+const WINDOW_FULL_DROP = 145; // click = full reveal: clears the whole opening
+
+// ---- PEEK TUNING (the auto roll on the cycle) ----
+// each is a [min, max] range, randomized per fire so no two peeks are identical. edit freely.
+const WINDOW_PEEK_GAP_MS: [number, number] = [12_000, 22_000]; // wait BETWEEN peeks
+const WINDOW_PEEK_DROP: [number, number] = [60, 76]; // how far down (~halfway of 136 = eyes)
+const WINDOW_PEEK_DOWN_MS: [number, number] = [340, 460]; // roll-DOWN duration
+const WINDOW_PEEK_HOLD_MS: [number, number] = [900, 1200]; // *** the PAUSE at the bottom ***
+const WINDOW_PEEK_UP_MS: [number, number] = [340, 460]; // roll-UP duration
+
+// ---- CLICK TUNING (the full reveal) ---- fixed ms, no jitter: down, pause, up.
+const WINDOW_FULL_DOWN_MS = 560;
+const WINDOW_FULL_HOLD_MS = 1100; // the PAUSE at the bottom on a click (shorter than before)
+const WINDOW_FULL_UP_MS = 620;
+
+// after a roll finishes (glass back up), how long before it's clickable / auto-peekable
+// again - a small cooldown that kills spam-clicks and back-to-back rolls.
+const WINDOW_COOLDOWN_MS = 400;
+
+// the photos that randomly alternate in the window. the swap only happens while the glass
+// is UP (hidden), so the change is never seen mid-reveal - just snaps behind closed glass.
+// drop more in src/assets and add them here.
+const WINDOW_PHOTOS = [stevenSrc, hotdogSrc];
+
+/** @description Random float in a [min, max] range. Jitters the peek's timing + depth. */
+const rand = ([min, max]: [number, number]) => min + Math.random() * (max - min);
+
+/**
+ * @description Rolls the cab window glass down by `drop` (viewBox units), holds, and rolls
+ * back up. linear easing reads like a mechanical crank. timing is explicit so each peek
+ * can be jittered and the click can get a longer, fuller reveal.
+ */
+function rollWindow(glass: Element, drop: number, downMs: number, holdMs: number, upMs: number) {
+  const total = downMs + holdMs + upMs;
+  return glass.animate(
+    [
+      { transform: "translateY(0)" },
+      { transform: `translateY(${drop}px)`, offset: downMs / total },
+      { transform: `translateY(${drop}px)`, offset: (downMs + holdMs) / total },
+      { transform: "translateY(0)" },
+    ],
+    { duration: total, easing: "linear" },
+  );
+}
 
 /**
  * @description Spawns a single note-clone (a colored rect) in the swallow-layer and
@@ -125,6 +176,22 @@ export function GarbageTruck() {
 
   const onRoute = pathname === TRUCK_ROUTE;
   const truckRef = useRef<HTMLDivElement>(null);
+  // true while the window glass is mid-roll OR in its post-roll cooldown. the single guard
+  // that prevents click/auto-peek collisions, spam clicks, and clicking while it's down.
+  const windowBusyRef = useRef(false);
+
+  // the photo currently behind the cab window. swapped (while the glass is up) by the peek
+  // loop below so it randomly alternates without a visible snap mid-reveal.
+  const [windowPhoto, setWindowPhoto] = useState(WINDOW_PHOTOS[0]);
+
+  // preload all window photos so the first swap to a not-yet-shown one is instant (no flash
+  // of an unloaded image when the glass rolls down on it).
+  useEffect(() => {
+    WINDOW_PHOTOS.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
 
   // roll the wheels through WHEEL_TURNS full turns on the SAME curve/duration as the
   // drive, so they decelerate with the truck (arrival) / accelerate with it (leaving)
@@ -174,6 +241,81 @@ export function GarbageTruck() {
     swallowNote(root, ingestColor);
   }, [ingestNonce, ingestColor, animationsEnabled]);
 
+  // cab-window easter egg. click = full reveal. while parked on /rants, a peek fires on a
+  // randomized 12-22s gap (so it's not metronomic), rolling ~halfway with a jittered ~1s
+  // hold to flash the eyes. just BEFORE each peek - while the glass is still up - we swap to
+  // a random photo, so the alternation is hidden and only ever revealed already-changed.
+  useEffect(() => {
+    const root = truckRef.current;
+    const frame = root?.querySelector<SVGGElement>("#WINDOW-GLASS-FRAME");
+    if (!root || !frame || !animationsEnabled) return;
+
+    // start clean (in case we re-entered /rants mid-roll from a prior visit)
+    windowBusyRef.current = false;
+    frame.style.pointerEvents = "auto";
+
+    let peekTimer: number | undefined;
+
+    // run one roll (down/hold/up) behind the busy guard. while busy: ref blocks new rolls
+    // AND pointer-events:none makes the window physically un-clickable (the click can't even
+    // fire). on the way back UP the photo swaps (hidden behind closed glass), then a short
+    // cooldown lifts the lock and fires onDone.
+    const doRoll = (drop: number, downMs: number, holdMs: number, upMs: number, onDone: () => void) => {
+      const glass = root.querySelector("#window-glass");
+      if (!glass || windowBusyRef.current) return;
+      windowBusyRef.current = true;
+      frame.style.pointerEvents = "none";
+      const anim = rollWindow(glass, drop, downMs, holdMs, upMs);
+      anim.onfinish = () => {
+        // glass is fully up (covering) - swap to a DIFFERENT photo now, unseen, for next time
+        setWindowPhoto((prev) => {
+          const others = WINDOW_PHOTOS.filter((p) => p !== prev);
+          return others[Math.floor(Math.random() * others.length)] ?? prev;
+        });
+        window.setTimeout(() => {
+          windowBusyRef.current = false;
+          frame.style.pointerEvents = "auto";
+          onDone();
+        }, WINDOW_COOLDOWN_MS);
+      };
+    };
+
+    // the auto peek: wait a random gap, then (if idle) roll a jittered half-peek. the photo
+    // swap happens on the roll-UP (in doRoll), so it's always hidden. reschedules itself.
+    const scheduleNextPeek = () => {
+      peekTimer = window.setTimeout(() => {
+        if (windowBusyRef.current) {
+          scheduleNextPeek(); // busy right now - just wait another gap
+          return;
+        }
+        doRoll(
+          rand(WINDOW_PEEK_DROP),
+          rand(WINDOW_PEEK_DOWN_MS),
+          rand(WINDOW_PEEK_HOLD_MS),
+          rand(WINDOW_PEEK_UP_MS),
+          scheduleNextPeek,
+        );
+      }, rand(WINDOW_PEEK_GAP_MS));
+    };
+
+    // manual click = full reveal. ignored while busy (no spam, no click-while-down). it
+    // cancels the pending auto-peek and, when done, restarts the peek cadence fresh from now
+    // - so an auto-roll never piles onto your manual one.
+    const onClick = () => {
+      if (windowBusyRef.current) return;
+      if (peekTimer) clearTimeout(peekTimer);
+      doRoll(WINDOW_FULL_DROP, WINDOW_FULL_DOWN_MS, WINDOW_FULL_HOLD_MS, WINDOW_FULL_UP_MS, scheduleNextPeek);
+    };
+
+    frame.addEventListener("click", onClick);
+    if (onRoute) scheduleNextPeek();
+
+    return () => {
+      frame.removeEventListener("click", onClick);
+      if (peekTimer) clearTimeout(peekTimer);
+    };
+  }, [onRoute, animationsEnabled]);
+
   return (
     <div className={styles.stage} aria-hidden>
       <motion.div
@@ -191,7 +333,7 @@ export function GarbageTruck() {
         // data-armed rides on the truck so later CSS can react when a note's over the
         // hopper; compactorRef is pointed at the invisible hitbox rect inside the art.
         data-armed={hopperArmed || undefined}>
-        <GarbageTruckArt className={styles.art} hitboxRef={compactorRef} />
+        <GarbageTruckArt className={styles.art} hitboxRef={compactorRef} photoSrc={windowPhoto} />
       </motion.div>
     </div>
   );

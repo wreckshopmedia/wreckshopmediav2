@@ -4,6 +4,8 @@ interface GarbageTruckArtProps {
   className?: string;
   /** ref onto the invisible hopper-hitbox rect - sticky notes hit-test against this */
   hitboxRef: Ref<SVGRectElement>;
+  /** URL for the cab-window easter-egg photo (imported asset, passed from GarbageTruck) */
+  photoSrc: string;
 }
 
 /**
@@ -15,7 +17,7 @@ interface GarbageTruckArtProps {
  * re-run scripts/svg2jsx.mjs on a fresh export rather than hand-editing this file.
  * @author Chris "Mo" Mochinski
  */
-export function GarbageTruckArt({ className, hitboxRef }: GarbageTruckArtProps) {
+export function GarbageTruckArt({ className, hitboxRef, photoSrc }: GarbageTruckArtProps) {
   return (
     <svg
       className={className}
@@ -424,7 +426,23 @@ export function GarbageTruckArt({ className, hitboxRef }: GarbageTruckArtProps) 
             fill="#727272"
           />
         </g>
+        {/* ----------------------------------------------------------- */}
+        {/* ----------------------------------------------------------- */}
+        {/* ----------------------------------------------------------- */}
+        {/* ----------- EASTER EGG #1: G-TRUCK WINDOW PHOTO ----------- */}
+        {/* ----------------------------------------------------------- */}
+        {/* ----------------------------------------------------------- */}
+        {/* ----------------------------------------------------------- */}
         <g id="WINDOW-GLASS-FRAME" clipPath="url(#clip0_2458_1364)">
+          <image
+            id="window-photo"
+            href={photoSrc}
+            x="187"
+            y="165"
+            width="214"
+            height="136"
+            preserveAspectRatio="xMidYMid meet"
+          />
           <path
             id="window-glass"
             d="M203.723 301C195.511 301 189.725 292.937 192.355 285.158L230.209 173.158C231.857 168.282 236.431 165 241.577 165L389 165.001C395.627 165.001 401 170.374 401 177.001V289C401 295.627 395.627 301 389 301H203.723Z"

@@ -33,7 +33,7 @@ USE AS THEME FILE!
   --color-text-body: #050505;
 
   /* other light candidates (move up if used) */
-  --light-tangerine: #fcac88;
+  --light-apricot: #fed7aa;
 
   /* other dark options (move up if used) */
   --dark-tangerine: #dd6e42;
@@ -55,8 +55,8 @@ USE AS THEME FILE!
   --sticky-note-red: var(--error-tomato); /* theme ref - works great, tweak away */
   --sticky-note-green: #b3efbd;
   --sticky-note-blue: #aef2fd;
-  --sticky-note-peach: #fed7aa;
-  --color-text-sticky-note: #342f2d;
+  --sticky-note-peach: var(--light-apricot); /* v2, may replace??? */
+  --color-text-sticky-note: #413B39; /* v2, lighter, pencil color */
 
   /* ----------------------------------------------- */
   /* ----------------------------------------------- */

@@ -34,15 +34,13 @@
   pointer-events: auto;
   /* offset shadow sells the lift off the canvas */
   box-shadow:
-    0 1px 1px color(from var(--stroke-black) srgb r g b / 0.12),
-    0 6px 14px color(from var(--stroke-black) srgb r g b / 0.18);
+    0 1px 1px color(from var(--color-text-sticky-note) srgb r g b / 0.12),
+    0 6px 14px color(from var(--color-text-sticky-note) srgb r g b / 0.18);
 }
 
 .noteText {
   font-family: var(--handwriting);
-  /* font-size: */ /* > FUNCTION DEFINITION */
-  /* line-height: */ /* > FUNCTION DEFINITION */
-  color: var(--color-text-title);
+  color: var(--color-text-sticky-note);
   margin: 0;
   overflow: hidden;
   text-align: left;

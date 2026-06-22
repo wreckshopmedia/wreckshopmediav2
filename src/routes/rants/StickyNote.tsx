@@ -33,7 +33,26 @@ function noteFontSize(len: number): string {
   return "9.5cqi";
 }
 
-/* TODO revisit line heights when more done */
+/**
+ * @description Note text opacity change based on rant length.
+ * shorter text = more see-through
+ */
+function noteOpacity(len: number): number {
+  if (len <= 12) return 0.7;
+  if (len <= 30) return 0.8;
+  if (len <= 80) return 0.9;
+  if (len <= 140) return 1;
+  return 1;
+}
+
+// the author signature tracks the body-text opacity but sits this much fainter at every
+// length, so the name always reads a quiet step behind the rant itself.
+const AUTHOR_OPACITY_OFFSET = 0.15;
+
+/** @description Author signature opacity - the body-text opacity, a touch more see-through. */
+function noteAuthorOpacity(len: number): number {
+  return noteOpacity(len) - AUTHOR_OPACITY_OFFSET;
+}
 
 /** @description Picks a line-height for the note text based on rant length. */
 function noteLineHeight(len: number): string {
@@ -213,10 +232,19 @@ export function StickyNote({
           fontSize: noteFontSize(rant.text.length),
           lineHeight: noteLineHeight(rant.text.length),
           padding: noteInnerPadding(rant.text.length),
+          // shorter rants get bigger text but fainter ink, so the big scrawls don't
+          // read as heavy as a packed note - opacity tracks length via noteOpacity.
+          color: `color(from var(--color-text-sticky-note) srgb r g b / ${noteOpacity(rant.text.length)})`,
         }}>
         {rant.text}
       </p>
-      <span className={styles.noteAuthor}>{rant.name || "anon"}</span>
+      <span
+        className={styles.noteAuthor}
+        style={{
+          color: `color(from var(--color-text-sticky-note) srgb r g b / ${noteAuthorOpacity(rant.text.length)})`,
+        }}>
+        {rant.name || "anon"}
+      </span>
     </motion.div>
   );
 }

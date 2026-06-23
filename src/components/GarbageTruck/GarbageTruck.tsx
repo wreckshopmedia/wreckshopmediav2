@@ -260,7 +260,13 @@ export function GarbageTruck() {
     // AND pointer-events:none makes the window physically un-clickable (the click can't even
     // fire). on the way back UP the photo swaps (hidden behind closed glass), then a short
     // cooldown lifts the lock and fires onDone.
-    const doRoll = (drop: number, downMs: number, holdMs: number, upMs: number, onDone: () => void) => {
+    const doRoll = (
+      drop: number,
+      downMs: number,
+      holdMs: number,
+      upMs: number,
+      onDone: () => void,
+    ) => {
       const glass = root.querySelector("#window-glass");
       if (!glass || windowBusyRef.current) return;
       windowBusyRef.current = true;
@@ -304,7 +310,13 @@ export function GarbageTruck() {
     const onClick = () => {
       if (windowBusyRef.current) return;
       if (peekTimer) clearTimeout(peekTimer);
-      doRoll(WINDOW_FULL_DROP, WINDOW_FULL_DOWN_MS, WINDOW_FULL_HOLD_MS, WINDOW_FULL_UP_MS, scheduleNextPeek);
+      doRoll(
+        WINDOW_FULL_DROP,
+        WINDOW_FULL_DOWN_MS,
+        WINDOW_FULL_HOLD_MS,
+        WINDOW_FULL_UP_MS,
+        scheduleNextPeek,
+      );
     };
 
     frame.addEventListener("click", onClick);
@@ -325,7 +337,10 @@ export function GarbageTruck() {
         animate={{ x: onRoute ? DOCK_X : AWAY_X }}
         transition={
           animationsEnabled
-            ? { duration: (onRoute ? DRIVE.in.ms : DRIVE.out.ms) / 1000, ease: (onRoute ? DRIVE.in : DRIVE.out).bezier }
+            ? {
+                duration: (onRoute ? DRIVE.in.ms : DRIVE.out.ms) / 1000,
+                ease: (onRoute ? DRIVE.in : DRIVE.out).bezier,
+              }
             : { duration: 0 }
         }
         onAnimationStart={rollWheels}
@@ -333,7 +348,88 @@ export function GarbageTruck() {
         // data-armed rides on the truck so later CSS can react when a note's over the
         // hopper; compactorRef is pointed at the invisible hitbox rect inside the art.
         data-armed={hopperArmed || undefined}>
-        <GarbageTruckArt className={styles.art} hitboxRef={compactorRef} photoSrc={windowPhoto} />
+        <GarbageTruckArt className={styles.art} hitboxRef={compactorRef} photoSrc={windowPhoto}>
+          {/*
+            HOPPER HAZARD LIGHT - hand-authored, tweak freely. (The truck body is generated
+            by scripts/svg2jsx.mjs and gets overwritten; THIS does not - edit away.) Renders
+            inside the truck svg, so coords are viewBox units. It's the SAME square as the
+            light (1456,462 52x56): a solid-orange panel + 4-directional glow, with a blurred
+            white rounded-SQUARE laid on top for the hot center. (SVG radial gradients are
+            round-only, so the square "gradient" is a blurred rect - the blur feathers its
+            edges into the orange.) The on/off STROBE lives in garbageTruck.module.css.
+            Tweak:
+              - colors: the orange `fill` + the drop-shadow color; white center = its `fill`
+              - white core size/shape: the inner rect's width/height + rx (roundness)
+              - how soft the white -> orange transition is: feGaussianBlur stdDeviation
+              - glow reach: drop-shadow offsets (5) / blur (8)
+              - outline: stroke / strokeWidth
+          */}
+          <defs>
+            <filter id="warning-core-blur" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="5" />
+            </filter>
+            {/* the "cast light" wash: bright white center -> transparent. screen-blended (below)
+                so it BRIGHTENS the reflector/hopper colors like real light, not a flat overlay.
+                want a warmer "orange light" tint? change these stopColors toward #ffd9a0. */}
+            <radialGradient id="warning-cast">
+              <stop offset="0" stopColor="#ffffff" stopOpacity="0.9" />
+              <stop offset="0.5" stopColor="#ffffff" stopOpacity="0.4" />
+              <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+
+          {/*
+            CAST LIGHT - a DIRECT SIBLING of the truck art (NOT inside the strobing group), so
+            its mix-blend-mode:screen blends against the truck behind it. it strobes via
+            FILL-OPACITY (animated in CSS), NOT opacity - because opacity would render it to an
+            offscreen buffer and isolate the blend (blend against nothing = no effect). screen +
+            white = the reflector/panel light up. .art has isolation:isolate so this only ever
+            brightens the truck, never the page. grow r / raise the gradient stops for more.
+          */}
+          <circle
+            id="warning-cast-light"
+            cx="1458"
+            cy="474"
+            r="118"
+            fill="url(#warning-cast)"
+            fillOpacity={0}
+            style={{ mixBlendMode: "screen" }}
+          />
+
+          {/* the bulb itself - opaque overlays, so the opacity strobe here is fine (no blend) */}
+          <g id="warning-light" opacity="0">
+            {/* the lit orange panel + its own orange glow (layered, biased right/away from truck) */}
+            <rect
+              x="1455"
+              y="462"
+              width="54"
+              height="58"
+              rx="3"
+              fill="#ff7f30"
+              stroke="#FF620040"
+              strokeWidth="3"
+              style={{
+                filter: `drop-shadow(0 -3px 5px #ff7f3060)
+                  drop-shadow(-5px 0 6px #ff7f3070)
+                  drop-shadow(0 5px 7px #ff7f3080)
+                  drop-shadow(5px 0 7px #ff7f3080)
+                  drop-shadow(20px 0 14px #FF620040)
+                  drop-shadow(7px -7px 12px #FF620040)
+                  drop-shadow(7px 7px 12px #FF620040)`,
+              }}
+            />
+            {/* white-hot center: a rounded SQUARE, blurred so it bleeds into the orange */}
+            <rect
+              x="1464"
+              y="474"
+              width="30"
+              height="33"
+              rx="9"
+              fill="#ffffff"
+              filter="url(#warning-core-blur)"
+            />
+          </g>
+        </GarbageTruckArt>
       </motion.div>
     </div>
   );

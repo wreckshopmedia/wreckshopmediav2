@@ -1,4 +1,4 @@
-import type { Ref } from "react";
+import type { ReactNode, Ref } from "react";
 
 interface GarbageTruckArtProps {
   className?: string;
@@ -6,6 +6,8 @@ interface GarbageTruckArtProps {
   hitboxRef: Ref<SVGRectElement>;
   /** URL for the cab-window easter-egg photo (imported asset, passed from GarbageTruck) */
   photoSrc: string;
+  /** hand-authored SVG overlays rendered inside the truck svg (e.g. the hazard light) */
+  children?: ReactNode;
 }
 
 /**
@@ -17,7 +19,12 @@ interface GarbageTruckArtProps {
  * re-run scripts/svg2jsx.mjs on a fresh export rather than hand-editing this file.
  * @author Chris "Mo" Mochinski
  */
-export function GarbageTruckArt({ className, hitboxRef, photoSrc }: GarbageTruckArtProps) {
+export function GarbageTruckArt({
+  className,
+  hitboxRef,
+  photoSrc,
+  children,
+}: GarbageTruckArtProps) {
   return (
     <svg
       className={className}
@@ -426,13 +433,6 @@ export function GarbageTruckArt({ className, hitboxRef, photoSrc }: GarbageTruck
             fill="#727272"
           />
         </g>
-        {/* ----------------------------------------------------------- */}
-        {/* ----------------------------------------------------------- */}
-        {/* ----------------------------------------------------------- */}
-        {/* ----------- EASTER EGG #1: G-TRUCK WINDOW PHOTO ----------- */}
-        {/* ----------------------------------------------------------- */}
-        {/* ----------------------------------------------------------- */}
-        {/* ----------------------------------------------------------- */}
         <g id="WINDOW-GLASS-FRAME" clipPath="url(#clip0_2458_1364)">
           <image
             id="window-photo"
@@ -752,7 +752,7 @@ export function GarbageTruckArt({ className, hitboxRef, photoSrc }: GarbageTruck
             ref={hitboxRef}
             x="1120"
             y="0"
-            width="442"
+            width="540"
             height="600"
             fillOpacity={0}
           />
@@ -1072,6 +1072,7 @@ export function GarbageTruckArt({ className, hitboxRef, photoSrc }: GarbageTruck
           <rect width="214" height="136" fill="white" transform="translate(187 165)" />
         </clipPath>
       </defs>
+      {children}
     </svg>
   );
 }

@@ -61,8 +61,13 @@ svg = svg.replace(/(<g id="hopper-group")/, `<g id="swallow-layer" />\n$1`);
 // irrelevant). ref so the rants board can measure it. coords in the 1562x662 viewBox.
 svg = svg.replace(
   /(<g id="hopper-group"[^>]*>)/,
-  `$1\n<rect id="hopper-hitbox" ref={hitboxRef} x="1120" y="0" width="442" height="600" fillOpacity={0} />`,
+  `$1\n<rect id="hopper-hitbox" ref={hitboxRef} x="1120" y="0" width="540" height="600" fillOpacity={0} />`,
 );
+
+// render any children passed to <GarbageTruckArt> inside the truck svg, just before the
+// close - so hand-authored overlays (the hazard light lives in GarbageTruck.tsx) share this
+// viewBox and paint on top. keeps tweakable art OUT of this generated file.
+svg = svg.replace(/<\/svg>\s*$/, `{children}\n</svg>`);
 
 // inject the window easter-egg photo as the FIRST child of WINDOW-GLASS-FRAME: it's
 // clipped to the window opening (clip0 = 187,165 214x136) and sits BEHIND window-glass,
@@ -73,7 +78,7 @@ svg = svg.replace(
   `$1\n<image id="window-photo" href={photoSrc} x="187" y="165" width="214" height="136" preserveAspectRatio="xMidYMid meet" />`,
 );
 
-const file = `import type { Ref } from "react";
+const file = `import type { ReactNode, Ref } from "react";
 
 interface GarbageTruckArtProps {
   className?: string;
@@ -81,6 +86,8 @@ interface GarbageTruckArtProps {
   hitboxRef: Ref<SVGRectElement>;
   /** URL for the cab-window easter-egg photo (imported asset, passed from GarbageTruck) */
   photoSrc: string;
+  /** hand-authored SVG overlays rendered inside the truck svg (e.g. the hazard light) */
+  children?: ReactNode;
 }
 
 /**
@@ -92,7 +99,7 @@ interface GarbageTruckArtProps {
  * re-run scripts/svg2jsx.mjs on a fresh export rather than hand-editing this file.
  * @author Chris "Mo" Mochinski
  */
-export function GarbageTruckArt({ className, hitboxRef, photoSrc }: GarbageTruckArtProps) {
+export function GarbageTruckArt({ className, hitboxRef, photoSrc, children }: GarbageTruckArtProps) {
   return (
 ${svg}
   );

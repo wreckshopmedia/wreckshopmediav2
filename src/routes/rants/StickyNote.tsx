@@ -47,7 +47,7 @@ function noteOpacity(len: number): number {
 
 // the author signature tracks the body-text opacity but sits this much fainter at every
 // length, so the name always reads a quiet step behind the rant itself.
-const AUTHOR_OPACITY_OFFSET = 0.15;
+const AUTHOR_OPACITY_OFFSET = 0.2;
 
 /** @description Author signature opacity - the body-text opacity, a touch more see-through. */
 function noteAuthorOpacity(len: number): number {

@@ -31,6 +31,16 @@
   width: clamp(240px, 42vw, 580px);
   pointer-events: none;
   will-change: transform;
+  /* scale grows from the road (not center) so the armed swell doesn't lift the wheels.
+     only `scale` transitions - the drive's translateX is Motion's, a separate property. */
+  transform-origin: bottom center;
+  transition: scale 0.2s ease;
+}
+
+/* a note is hovering the hopper, about to be tossed: the truck swells a hair, like it's
+   bracing to eat it. data-armed is set from hopperArmed (see GarbageTruck.tsx). */
+.truck[data-armed] {
+  scale: 1.03;
 }
 
 /* the converted Figma SVG. width:100% fills .truck; height:auto keeps its intrinsic
@@ -42,6 +52,9 @@
   width: 100%;
   height: auto;
   overflow: visible;
+  /* isolation boundary for the hazard cast-light's mix-blend-mode:screen - it brightens the
+     truck behind it but never bleeds the blend onto the page. */
+  isolation: isolate;
 }
 
 /*
@@ -101,4 +114,70 @@
 .art :global(#WINDOW-GLASS-FRAME) {
   pointer-events: auto;
   cursor: pointer;
+}
+
+/*
+  ---------- HOPPER HAZARD LIGHT ----------
+  while a note is armed over the hopper, the rear warning light strobes as a "this is about
+  to get eaten" heads-up. #warning-light is the HAND-AUTHORED overlay in GarbageTruck.tsx
+  (gradients, shapes, colors - tweak it there); this CSS only drives the on/off strobe.
+*/
+.truck[data-armed] :global(#warning-light) {
+  animation: hopperWarn 650ms linear infinite;
+}
+
+/* the cast-light strobes in sync but on FILL-OPACITY, not opacity - opacity would isolate
+   its screen blend (see GarbageTruck.tsx). same 650ms/timing keeps it locked to the bulb. */
+.truck[data-armed] :global(#warning-cast-light) {
+  animation: hopperWarnCast 650ms linear infinite;
+}
+@keyframes hopperWarnCast {
+  0% {
+    fill-opacity: 0;
+  }
+  5% {
+    fill-opacity: 1;
+  }
+  46% {
+    fill-opacity: 1;
+  }
+  51% {
+    fill-opacity: 0;
+  }
+  100% {
+    fill-opacity: 0;
+  }
+}
+
+/* a strobe with rests, NOT a fade: snap on, hold on, snap off, hold off, repeat. the tight
+   5% ramps read as near-instant; widen them to soften, or shift the 46/51 marks to change
+   the on-vs-off hold ratio. */
+@keyframes hopperWarn {
+  0% {
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  46% {
+    opacity: 1;
+  }
+  51% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* reduced motion: hold the warning light steady-on instead of strobing while armed */
+@media (prefers-reduced-motion: reduce) {
+  .truck[data-armed] :global(#warning-light) {
+    animation: none;
+    opacity: 0.85;
+  }
+  .truck[data-armed] :global(#warning-cast-light) {
+    animation: none;
+    fill-opacity: 0.6;
+  }
 }

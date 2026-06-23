@@ -191,9 +191,9 @@
   background: color(from var(--color-text-title) srgb r g b / 0.07);
   cursor: pointer;
   transition:
-    transform 0.16s ease,
-    background 0.16s ease,
-    border-color 0.16s ease;
+    transform 130ms ease-out,
+    background 130ms ease-out,
+    border-color 130ms ease-out;
 
   &:hover {
     transform: scale(1.18) rotate(18deg);

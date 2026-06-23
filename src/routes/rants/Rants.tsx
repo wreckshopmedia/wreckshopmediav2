@@ -1,9 +1,5 @@
 import { useRants } from "../../hooks/useRants";
 import { StickyBoard } from "./rantsIndex";
-// parked alternatives - swap any of these back in if needed
-// import { RantForm } from "./rantsIndex";
-// import { RantCard } from "./rantsIndex";
-// import { RantList } from "./rantsIndex";
 
 /**
  * @description Rants page. A sticky-note board: existing rants scatter across a
@@ -27,11 +23,6 @@ export function Rants() {
         updatePlacement={updatePlacement}
         deleteRantSoft={deleteRantSoft}
       />
-
-      {/* ---------- PARKED VIEWS (swap in if needed) ---------- */}
-      {/* <RantForm addRant={addRant} /> */}
-      {/* <div className={styles.rantCardWrap}><RantCard rants={rants} /></div> */}
-      {/* <RantList rants={rants} loading={loading} error={error} /> */}
     </>
   );
 }

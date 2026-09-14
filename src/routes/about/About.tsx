@@ -11,10 +11,11 @@ export function About() {
   return (
     <>
       {/* POC: a couple plants sprout on route enter (remount = fresh grow). drop pins
-          the stem base to the hill line; offset places them flanking the logo. */}
+          the stem base to the hill line; offset places them flanking the logo. heads up -
+          the hill line rides with the logo's height, so retune drop if .logo width changes. */}
       <RootedPlant
         side="left"
-        drop={95}
+        drop={104}
         offset="clamp(7rem, 20vw, 13rem)"
         growDuration={1}
         height={0.7}
@@ -26,7 +27,7 @@ export function About() {
       />
       <RootedPlant
         side="left"
-        drop={95}
+        drop={104}
         offset="clamp(8rem, 22vw, 14rem)"
         growDuration={1.7}
         height={1.1}
@@ -38,7 +39,7 @@ export function About() {
       />
       <RootedPlant
         side="right"
-        drop={95}
+        drop={104}
         offset="clamp(7rem, 20vw, 13rem)"
         delay={1}
         growDuration={1}

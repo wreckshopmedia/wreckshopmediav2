@@ -196,3 +196,12 @@ html[data-debug-bounds] #hopper-hitbox {
   fill: var(--error-tomato);
   fill-opacity: 0.3;
 }
+
+/*
+  while a sticky note is held, StickyNote sets data-note-dragging on <html>. links and buttons
+  go deaf to the pointer so dragging a note across them doesn't fire their hover states.
+  the magnetic nav wrappers opt out on their own in navRow.module.css.
+*/
+html[data-note-dragging] :is(a, button) {
+  pointer-events: none;
+}

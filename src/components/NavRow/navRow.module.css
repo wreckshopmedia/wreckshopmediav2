@@ -37,6 +37,11 @@
   position: relative;
   padding: 0.5em 0.75em;
   margin: -0.5em -0.75em;
+
+  /* no magnetic reach while a sticky note is being dragged over the nav */
+  :global(html[data-note-dragging]) & {
+    pointer-events: none;
+  }
 }
 
 /* the part that actually slides toward the cursor (text + pill ride together) */

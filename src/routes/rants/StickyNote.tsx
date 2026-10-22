@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { animate, motion, useMotionValue, useSpring, useTransform, useVelocity } from "motion/react";
 import type { PanInfo } from "motion/react";
 import type { Rant } from "../../hooks/useRants";
@@ -21,6 +21,14 @@ const FROZEN_ANGLE_CAP = 30;
 // right (like pinching the top-left corner), right third tilts left, middle hangs
 // straight. this is the resting point gravity pulls toward while you hold it.
 const GRAB_LEAN_DEG = 10;
+
+/**
+ * @description Flags the document while a note is held so global CSS can mute link and
+ * button hover states underneath the drag (see the data-note-dragging rule in index.css).
+ */
+function setNoteDragging(on: boolean): void {
+  document.documentElement.toggleAttribute("data-note-dragging", on);
+}
 
 /* TODO revisit font sizes when more done */
 
@@ -152,6 +160,10 @@ export function StickyNote({
   // tracks trash-hover so we only re-animate on enter/leave, not every drag frame
   const overTrash = useRef(false);
 
+  // a note can unmount mid-drag (realtime delete, route change) without ever firing
+  // onDragEnd, so drop the page-wide flag on the way out or the links stay dead
+  useEffect(() => () => setNoteDragging(false), []);
+
   /** @description Is the pointer currently inside the trash hitbox? */
   function pointerOverTrash(info: PanInfo): boolean {
     return pointInRect(info.point.x, info.point.y, trashRef.current?.getBoundingClientRect());
@@ -165,6 +177,7 @@ export function StickyNote({
     const zone = rect ? (info.point.x - rect.left) / rect.width : 0.5;
     restAngle.set(zone < 0.34 ? GRAB_LEAN_DEG : zone > 0.66 ? -GRAB_LEAN_DEG : 0);
     dragging.set(1); // arm the velocity lean
+    setNoteDragging(true);
   }
 
   function handleDrag(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
@@ -186,6 +199,7 @@ export function StickyNote({
     const frozen = clamp(rotate.get(), -FROZEN_ANGLE_CAP, FROZEN_ANGLE_CAP);
     restAngle.set(frozen);
     dragging.set(0);
+    setNoteDragging(false);
     onTrashHover(false);
 
     if (dropEnabled && pointerOverTrash(info)) {

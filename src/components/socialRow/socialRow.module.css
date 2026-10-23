@@ -46,16 +46,13 @@
   }
 }
 
-/* the hand-drawn scribble ring - sized a bit bigger than the glyph, centered,
-   and allowed to spill past the icon box. inky pencil color via currentColor. */
+/* where the shared hand-drawn ring sits on an icon - a bit bigger than the glyph,
+   centered, inky pencil color via currentColor. the bones live in Scribble. */
 .scribble {
-  position: absolute;
   top: 50%;
   left: 50%;
   width: 175%;
   height: 175%;
   translate: -50% -50%;
   color: color(from var(--color-text-body) srgb r g b / 0.7);
-  pointer-events: none;
-  overflow: visible;
 }

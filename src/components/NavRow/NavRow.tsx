@@ -36,8 +36,8 @@ interface NavRowProps {
 
 /**
  * @description Title row shared across all routes. "Wreck Shop" is center-locked
- * via CSS grid; route links flank it left and right. Active route link slides
- * down 7px with a spring - no extra elements, no per-change opacity toggling.
+ * via CSS grid; route links flank it left and right. The active route stays circled
+ * with a faint pen oval (see MagneticLink) - no extra elements, no opacity toggling.
  * @author Chris "Mo" Mochinski
  */
 export function NavRow({ visible, hillFlat = false }: NavRowProps) {
@@ -49,18 +49,16 @@ export function NavRow({ visible, hillFlat = false }: NavRowProps) {
     return (
       <motion.div
         key={r.path}
-        initial={{ opacity: visible ? 1 : 0, y: 0 }}
-        animate={{
-          opacity: visible ? 1 : 0,
-          y: isActive ? -6 : 0,
-        }}
-        transition={{
-          opacity: { duration: 0.4, delay: visible ? 0.3 + i * 0.08 : 0 },
-          y: isActive
-            ? { type: "tween", duration: 0.175, ease: "easeOut" }
-            : { type: "spring", stiffness: 320, damping: 10 },
-        }}>
-        <MagneticLink to={r.path} label={r.label} isActive={isActive} magnetic={magnetic} />
+        initial={{ opacity: visible ? 1 : 0 }}
+        animate={{ opacity: visible ? 1 : 0 }}
+        transition={{ opacity: { duration: 0.4, delay: visible ? 0.3 + i * 0.08 : 0 } }}>
+        <MagneticLink
+          to={r.path}
+          label={r.label}
+          isActive={isActive}
+          magnetic={magnetic}
+          index={ALL_ROUTES.indexOf(r)}
+        />
       </motion.div>
     );
   };

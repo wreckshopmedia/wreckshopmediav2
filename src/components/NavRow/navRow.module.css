@@ -35,6 +35,8 @@
 .magWrap {
   display: inline-block;
   position: relative;
+  /* set here (not on the link) so the pen oval's em offsets share the text's size */
+  font-size: clamp(13px, 1.7cqi, 16px);
   padding: 0.5em 0.75em;
   margin: -0.5em -0.75em;
 
@@ -44,31 +46,37 @@
   }
 }
 
-/* the part that actually slides toward the cursor (text + pill ride together) */
+/* the part that actually slides toward the cursor (text + pen oval ride together) */
 .magInner {
   display: inline-block;
   position: relative;
   will-change: transform;
 }
 
-/* soft surround that fades in on approach and gets dragged along magnetically */
-/* TODO tweak these hover pills */
-.magPill {
-  position: absolute;
-  inset: -0.2em -0.55em;
-  border-radius: 0.5em;
-  background: color(from var(--light-blue) srgb r g b / 0);
-  border: 1px solid color(from var(--color-text-title) srgb r g b / 0.3);
-  box-shadow: 0 2px 10px color(from var(--light-blue) srgb r g b / 0.25);
-  z-index: 0;
-  pointer-events: none;
+/* the hand-drawn pen oval, roomier than the word and centered on it - an oval has to
+   run well past the text's ends or it clips the corner letters. em-based so the margin
+   grows with the clamped nav font. Scribble measures this box and draws at real pixel
+   size, so the stroke never stretches. */
+.navScribble {
+  top: -0.7em;
+  left: -1.15em;
+  /* a touch less on the right - letter-spacing leaves a trailing gap after the last letter */
+  width: calc(100% + 2.15em);
+  height: calc(100% + 1.4em);
+  color: color(from var(--color-text-body) srgb r g b / 0.7); /* same ink as the social rings */
+  transition: color 0.3s ease;
+
+  /* the page you're on stays circled in a fainter pencil, so it reads as "already
+     marked" rather than "hovering". nudge the alpha to taste (lower = lighter). */
+  &.navScribbleCurrent {
+    color: color(from var(--color-text-body) srgb r g b / 0.35);
+  }
 }
 
 .routeLink {
   position: relative;
-  z-index: 1; /* above the pill surround */
+  z-index: 1; /* above the pen oval */
   font-family: var(--heading);
-  font-size: clamp(13px, 1.7cqi, 16px);
   letter-spacing: 0.15em;
   text-decoration: none;
   color: var(--color-text-title);

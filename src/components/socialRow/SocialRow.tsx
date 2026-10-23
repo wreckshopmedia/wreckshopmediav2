@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useAnimationControls, useSpring } from "motion/react";
 import { useHoverCapable } from "../../hooks/useHoverCapable";
 import { useReducedMotion } from "../../context/ReducedMotionContext";
+import { ScribbleCircle } from "../Scribble/scribbleIndex";
 import styles from "./socialRow.module.css";
 
 export function GithubIcon() {
@@ -224,55 +225,6 @@ const HOVER_SCALE = 1.14;
 const SCALE_SPRING_UP = { type: "spring", stiffness: 380, damping: 17 } as const;
 const SCALE_SPRING_DOWN = { type: "spring", stiffness: 210, damping: 22 } as const;
 
-// five hand-drawn-feeling rings so no two adjacent icons get an identical circle.
-// each loop overshoots its own start point and wobbles its radius on purpose -
-// drawn by a kid, not a compass. it stays wonky on hover (the off-kilter look is
-// the whole charm); tilt + stroke-width jitter add extra per-icon variety.
-const SCRIBBLE_PATHS = [
-  "M50 9 C73 7 95 26 92 49 C94 73 71 95 47 92 C23 94 5 71 9 47 C6 25 27 6 52 11",
-  "M52 11 C28 8 8 28 11 52 C8 74 30 95 51 90 C75 94 93 70 89 47 C93 24 72 7 49 12",
-  "M48 10 C70 9 93 23 90 47 C95 71 70 96 46 91 C22 95 7 69 10 46 C7 26 25 8 50 13",
-  "M50 12 C75 9 92 28 90 50 C92 72 70 94 48 91 C24 93 8 72 11 48 C7 27 28 9 53 9",
-  "M51 8 C77 9 94 29 90 52 C93 75 68 96 45 90 C21 93 6 68 11 45 C8 23 27 6 49 13",
-] as const;
-const SCRIBBLE_TILT = [-6, 5, -3, 8, -9] as const; // deg, so even similar loops read distinct
-const SCRIBBLE_WIDTH = [3, 2.7, 3.3, 2.9, 3.1] as const;
-
-/**
- * @description A deliberately imperfect, hand-drawn ring that scribbles itself
- * around an icon - FAST on hover (pathLength snaps on); on leave it erases quickly
- * but the stroke stays opaque until it's nearly retracted, THEN fades. Stays its
- * wonky, off-kilter self the whole time. `variant` picks one of the loops so
- * neighboring icons differ.
- * @author Chris "Mo" Mochinski
- */
-function ScribbleCircle({ active, variant }: { active: boolean; variant: number }) {
-  const i = variant % SCRIBBLE_PATHS.length;
-  return (
-    <motion.svg
-      className={styles.scribble}
-      viewBox="0 0 100 100"
-      fill="none"
-      aria-hidden
-      style={{ rotate: SCRIBBLE_TILT[i] }}>
-      <motion.path
-        d={SCRIBBLE_PATHS[i]}
-        stroke="currentColor"
-        strokeWidth={SCRIBBLE_WIDTH[i]}
-        strokeLinecap="round"
-        initial={false}
-        animate={{ pathLength: active ? 1 : 0, opacity: active ? 1 : 0 }}
-        transition={{
-          // really fast scribble ON, quick-but-lazier unwind OFF
-          pathLength: { duration: active ? 0.2 : 0.55, ease: active ? "easeOut" : "easeInOut" },
-          // hold the stroke visible while it retracts, then snap-fade near the end
-          opacity: active ? { duration: 0.1 } : { duration: 0.16, delay: 0.38 },
-        }}
-      />
-    </motion.svg>
-  );
-}
-
 interface SocialIconProps {
   label: string;
   href: string;
@@ -380,7 +332,7 @@ function SocialIcon({ label, href, Icon, index, magnetic }: SocialIconProps) {
         style={{ x, y }}
         animate={{ scale: hovered ? HOVER_SCALE : 1 }}
         transition={{ scale: hovered ? SCALE_SPRING_UP : SCALE_SPRING_DOWN }}>
-        <ScribbleCircle active={hovered} variant={index} />
+        <ScribbleCircle active={hovered} variant={index} className={styles.scribble} />
         <motion.span className={styles.iconGlyph} animate={wander}>
           <Icon />
         </motion.span>

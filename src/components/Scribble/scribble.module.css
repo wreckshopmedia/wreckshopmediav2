@@ -1,0 +1,8 @@
+/* shared bones for every pen loop - absolutely placed over its target, never steals the
+   pointer, and allowed to spill past its box. where it sits and what ink it uses is the
+   caller's call (see socialRow + navRow). */
+.scribble {
+  position: absolute;
+  pointer-events: none;
+  overflow: visible;
+}

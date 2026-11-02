@@ -53,24 +53,38 @@
   will-change: transform;
 }
 
-/* the hand-drawn pen oval, roomier than the word and centered on it - an oval has to
-   run well past the text's ends or it clips the corner letters. em-based so the margin
-   grows with the clamped nav font. Scribble measures this box and draws at real pixel
-   size, so the stroke never stretches. */
+/* the hand-drawn pen loop, a bit bigger than the word and centered on it. the loop is
+   squircle-ish (see OVAL_SQUARENESS) so it hugs the corner letters without needing a lot
+   of side room. em-based so the margin grows with the clamped nav font. Scribble
+   measures this box and draws at real pixel size, so the stroke never stretches. */
 .navScribble {
-  top: -0.7em;
-  left: -1.15em;
+  top: -0.6em;
+  left: -0.8em;
   /* a touch less on the right - letter-spacing leaves a trailing gap after the last letter */
-  width: calc(100% + 2.15em);
-  height: calc(100% + 1.4em);
+  width: calc(100% + 1.45em);
+  height: calc(100% + 1.2em);
   color: color(from var(--color-text-body) srgb r g b / 0.7); /* same ink as the social rings */
-  transition: color 0.3s ease;
+}
 
-  /* the page you're on stays circled in a fainter pencil, so it reads as "already
-     marked" rather than "hovering". nudge the alpha to taste (lower = lighter). */
-  &.navScribbleCurrent {
-    color: color(from var(--color-text-body) srgb r g b / 0.35);
-  }
+/* the hover "?" + arrow doodle. this svg is a 1em box whose top-left corner IS the
+   arrow's tip - ScribbleArrow sets `left` per link (where under the word it points) and
+   the drawing spills down and out from there. sits just under the text, inside the
+   wrapper's bottom padding. */
+.navArrow {
+  top: calc(100% - 0.3em);
+  width: 1em;
+  height: 1em;
+  color: color(from var(--color-text-body) srgb r g b / 0.7); /* same ink as the loops */
+}
+
+/* the current page's highlighter swipe - hugs the word closer than the pen loop, a hair
+   past each end like a real swipe. the ink color is set per route in NavRow. */
+.navHighlight {
+  top: -0.1em;
+  left: -0.3em;
+  /* less on the right - letter-spacing leaves a trailing gap after the last letter */
+  width: calc(100% + 0.45em);
+  height: calc(100% + 0.2em);
 }
 
 .routeLink {

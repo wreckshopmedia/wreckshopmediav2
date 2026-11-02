@@ -36,11 +36,12 @@
 }
 
 /* lower-center: positions the social icon row below the nav cluster. canvas-relative
-   (50% = nav center), parked in the bottom sixth - nudge `bottom` to taste. just an
-   anchor - SocialRow owns the row's internal layout, spacing, and animation. */
+   (50% = nav center), parked low enough that the nav's hover "?" doodles have room to
+   hang without landing on the icons - nudge `bottom` to taste. just an anchor -
+   SocialRow owns the row's internal layout, spacing, and animation. */
 .socialAnchor {
   position: absolute;
-  bottom: 16%;
+  bottom: 13.5%;
   left: 50%;
   translate: -50% 0;
   pointer-events: auto;

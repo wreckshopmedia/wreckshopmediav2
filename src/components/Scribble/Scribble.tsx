@@ -1,11 +1,12 @@
 /**
  * @module Scribble
- * @description Hand-drawn pen loops that scribble themselves around things. Two shapes
+ * @description Hand-drawn marks that scribble themselves onto things. Two pen loops
  * share one draw-on/erase feel: ScribbleCircle (fixed square loops, the social icons)
- * and ScribbleOval (drawn at the target's real pixel size, the nav links).
+ * and ScribbleOval (drawn at the target's real pixel size, the nav links). Plus
+ * ScribbleHighlight, a highlighter swipe that marks the nav's current page.
  * @author Chris "Mo" Mochinski
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { clsx } from "clsx";
 import styles from "./scribble.module.css";
@@ -13,11 +14,22 @@ import styles from "./scribble.module.css";
 /**
  * @description Shared pathLength/opacity timing - really fast scribble ON, a quicker
  * but lazier unwind OFF, with the stroke held opaque until it's nearly retracted.
+ * `quick` swaps the lazy unwind for a fast erase, for when another mark takes over.
  */
-function drawTransition(active: boolean) {
+function drawTransition(active: boolean, quick = false, delay = 0) {
+  if (!active && quick) {
+    return {
+      pathLength: { duration: 0.14, ease: "easeIn" },
+      opacity: { duration: 0.08, delay: 0.08 },
+    } as const;
+  }
   return {
-    pathLength: { duration: active ? 0.2 : 0.55, ease: active ? "easeOut" : "easeInOut" },
-    opacity: active ? { duration: 0.1 } : { duration: 0.16, delay: 0.38 },
+    pathLength: {
+      duration: active ? 0.2 : 0.55,
+      ease: active ? "easeOut" : "easeInOut",
+      delay: active ? delay : 0,
+    },
+    opacity: active ? { duration: 0.1, delay } : { duration: 0.16, delay: 0.38 },
   } as const;
 }
 
@@ -42,6 +54,12 @@ interface ScribbleProps {
   variant: number;
   /** positioning, sizing and ink color come from the caller */
   className?: string;
+  /** per-instance overrides, e.g. a highlighter's ink color */
+  style?: React.CSSProperties;
+  /** ScribbleOval: erase fast instead of the lazy unwind (another mark is taking over) */
+  quickErase?: boolean;
+  /** ScribbleOval / ScribbleHighlight: seconds to wait before drawing on */
+  delay?: number;
 }
 
 /**
@@ -74,7 +92,16 @@ export function ScribbleCircle({ active, variant, className }: ScribbleProps) {
 }
 
 // oval stroke in real screen px - never scaled, so it's the same weight all the way around
-const OVAL_STROKE = 1.8;
+const OVAL_STROKE = 1.5;
+
+// oval wobble, all in real px so short and long words get the same hand-drawn feel
+const OVAL_JITTER = 2.6; // how far each anchor drifts in or out of the clean shape
+const OVAL_TILT_DEG = 3.5; // max lean either way, like a quick loop drawn on the fly
+const OVAL_TAIL = 4.5; // how far the overshoot lands inside/outside the start
+// squareness of the loop: 2 is a true (pointy-ended) ellipse, higher pushes it toward a
+// rounded rectangle. 3 hugs a word's corners without ever reading as a box.
+const OVAL_SQUARENESS = 3;
+const OVAL_ANCHORS = 8; // points the pen passes through per lap - more = lumpier
 
 /** @description Tiny seeded PRNG (mulberry32) so each variant wobbles the same way every render. */
 function seededRandom(seed: number): () => number {
@@ -87,16 +114,12 @@ function seededRandom(seed: number): () => number {
   };
 }
 
-// oval wobble, all in real px so short and long words get the same hand-drawn feel
-const OVAL_JITTER = 2.2; // how far each anchor drifts in or out of a true ellipse
-const OVAL_TILT_DEG = 3; // max lean either way, like a quick loop drawn on the fly
-const OVAL_TAIL = 3.5; // how far the overshoot lands inside/outside the start
-
 /**
- * @description Builds a hand-drawn oval loop sized to a w x h box in real pixels. It
- * starts near the top, runs clockwise, and overshoots past its own start so the ends
- * cross, just like the circle loops. Seeded px-sized wobble, a slight lean and lumpy
- * handles keep it from reading as a perfect (or stretched) ellipse.
+ * @description Builds a hand-drawn loop sized to a w x h box in real pixels. The base
+ * shape is a superellipse (an oval nudged toward a rounded rectangle) so it hugs the
+ * word instead of running out to pointy ends. The pen starts near the top, runs
+ * clockwise through jittered anchors, and overshoots past its own start so the ends
+ * cross. A smooth curve threads the anchors, and a slight lean sells the quick scrawl.
  */
 function ovalPath(w: number, h: number, seed: number): string {
   const rand = seededRandom(seed + 1);
@@ -112,53 +135,57 @@ function ovalPath(w: number, h: number, seed: number): string {
   const cosT = Math.cos(tilt);
   const sinT = Math.sin(tilt);
 
-  const start = -Math.PI / 2 + (rand() - 0.5) * 0.6; // somewhere around the top
-  const overshoot = 0.55 + rand() * 0.35; // how far the pen runs past where it began
-  const tailIn = rand() > 0.5 ? -OVAL_TAIL : OVAL_TAIL; // inside or outside the start line
-  const angles = [start, 0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2, start + 2 * Math.PI + overshoot];
-  // px offsets per anchor - the tail gets its deliberate miss, the rest just wobble
-  const offsets = angles.map((_, i) => (i === angles.length - 1 ? tailIn : jitter()));
-  // per-segment handle fudge so each quarter bulges or flattens a little
-  const lumps = angles.map(() => 0.88 + rand() * 0.24);
-
-  // a point on the wobbly ellipse at angle t, pushed out by `off` px, then leaned by tilt
-  const lean = (x: number, y: number) => [cx + x * cosT - y * sinT, cy + x * sinT + y * cosT];
-  const point = (t: number, off: number) => lean((rx + off) * Math.cos(t), (ry + off) * Math.sin(t));
-  const tangent = (t: number, off: number) => {
-    const dx = -(rx + off) * Math.sin(t);
-    const dy = (ry + off) * Math.cos(t);
-    return [dx * cosT - dy * sinT, dx * sinT + dy * cosT];
+  // superellipse: raising cos/sin to 2/n flattens the sides and fills out the corners
+  const exp = 2 / OVAL_SQUARENESS;
+  const bend = (v: number) => Math.sign(v) * Math.abs(v) ** exp;
+  // a point on the loop at angle t, pushed out by `off` px, then leaned by the tilt
+  const at = (t: number, off: number) => {
+    const x = (rx + off) * bend(Math.cos(t));
+    const y = (ry + off) * bend(Math.sin(t));
+    return [cx + x * cosT - y * sinT, cy + x * sinT + y * cosT];
   };
-  const fmt = (n: number) => n.toFixed(1);
 
-  const [sx, sy] = point(angles[0], offsets[0]);
-  let d = `M${fmt(sx)} ${fmt(sy)}`;
-  for (let i = 1; i < angles.length; i++) {
-    const t1 = angles[i - 1];
-    const t2 = angles[i];
-    // standard cubic-bezier arc handle length for a span of (t2 - t1) radians, lumped
-    const k = (4 / 3) * Math.tan((t2 - t1) / 4) * lumps[i];
-    const [x1, y1] = point(t1, offsets[i - 1]);
-    const [dx1, dy1] = tangent(t1, offsets[i - 1]);
-    const [x2, y2] = point(t2, offsets[i]);
-    const [dx2, dy2] = tangent(t2, offsets[i]);
-    d += ` C${fmt(x1 + dx1 * k)} ${fmt(y1 + dy1 * k)} ${fmt(x2 - dx2 * k)} ${fmt(y2 - dy2 * k)} ${fmt(x2)} ${fmt(y2)}`;
+  const step = (2 * Math.PI) / OVAL_ANCHORS;
+  const start = -Math.PI / 2 + (rand() - 0.5) * 0.6; // somewhere around the top
+  const end = start + 2 * Math.PI;
+  const overshoot = 0.5 + rand() * 0.45; // how far the pen runs past where it began
+  const tailOff = rand() > 0.5 ? -OVAL_TAIL : OVAL_TAIL; // inside or outside the start line
+
+  // anchors on the even grid between start and a full lap, skipping any that crowd the ends
+  const angles = [start];
+  for (let t = Math.ceil(start / step + 0.2) * step; t < end - step * 0.3; t += step) angles.push(t);
+  angles.push(end, end + overshoot);
+  // the lap's closing point only half-wobbles so the crossing stays tidy; the tail misses
+  const last = angles.length - 1;
+  const points = angles.map((t, i) =>
+    at(t, i === last ? tailOff : i === last - 1 ? jitter() / 2 : jitter()),
+  );
+
+  // Catmull-Rom through the anchors, converted to cubic beziers. ghost points one step
+  // past each end give the first and last segments a natural direction to leave/arrive.
+  const all = [at(start - step, 0), ...points, at(end + overshoot + step, tailOff)];
+  const fmt = (n: number) => n.toFixed(1);
+  let d = `M${fmt(points[0][0])} ${fmt(points[0][1])}`;
+  for (let i = 1; i < all.length - 2; i++) {
+    const [p0, p1, p2, p3] = [all[i - 1], all[i], all[i + 1], all[i + 2]];
+    const c1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const c1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const c2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const c2y = p2[1] - (p3[1] - p1[1]) / 6;
+    d += ` C${fmt(c1x)} ${fmt(c1y)} ${fmt(c2x)} ${fmt(c2y)} ${fmt(p2[0])} ${fmt(p2[1])}`;
   }
   return d;
 }
 
 /**
- * @description A hand-drawn oval that scribbles itself around a word. Rather than
- * stretching a square loop (which would fatten the stroke on the ends), it measures its
- * own box and draws the loop at true pixel size, so the line stays clean and even at
- * any width. Same draw-on/erase feel as ScribbleCircle; `variant` seeds the wobble.
- * @author Chris "Mo" Mochinski
+ * @description Tracks an svg's rendered px size so marks can be drawn at true scale
+ * instead of stretched. The nav font is clamp()ed to the viewport, so it re-measures
+ * whenever the box changes. Size stays null until the first real measurement.
  */
-export function ScribbleOval({ active, variant, className }: ScribbleProps) {
+function useMeasuredBox() {
   const ref = useRef<SVGSVGElement>(null);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
 
-  // the nav font is clamp()ed to the viewport, so re-measure whenever the box changes
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -169,6 +196,25 @@ export function ScribbleOval({ active, variant, className }: ScribbleProps) {
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  return [ref, size] as const;
+}
+
+/**
+ * @description A hand-drawn oval that scribbles itself around a word. Rather than
+ * stretching a square loop (which would fatten the stroke on the ends), it measures its
+ * own box and draws the loop at true pixel size, so the line stays clean and even at
+ * any width. Same draw-on/erase feel as ScribbleCircle; `variant` seeds the wobble.
+ * @author Chris "Mo" Mochinski
+ */
+export function ScribbleOval({
+  active,
+  variant,
+  className,
+  quickErase,
+  delay = 0,
+}: ScribbleProps) {
+  const [ref, size] = useMeasuredBox();
 
   return (
     <svg
@@ -183,10 +229,134 @@ export function ScribbleOval({ active, variant, className }: ScribbleProps) {
           stroke="currentColor"
           strokeWidth={OVAL_STROKE}
           strokeLinecap="round"
+          strokeLinejoin="round"
           initial={{ pathLength: 0, opacity: 0 }}
           animate={{ pathLength: active ? 1 : 0, opacity: active ? 1 : 0 }}
-          transition={drawTransition(active)}
+          transition={drawTransition(active, quickErase, delay)}
         />
+      )}
+    </svg>
+  );
+}
+
+// highlighter ink - see-through so the second pass builds up a darker band where it overlaps
+const SWIPE_THICKNESS = 0.66; // main pass, as a fraction of the box height
+const SWIPE_SLANT = 0.2; // chisel-tip lean of the ends, as a fraction of the stroke thickness
+const SWIPE_OPACITY = 0.7;
+const SWIPE_SECOND_OPACITY = 0.5;
+
+/**
+ * @description Outlines one chisel-tip highlighter stroke from x0 to x1, centered on
+ * the line from y0 to y1. The ends lean like a real marker's slanted felt, and both long
+ * edges bow a little so it never reads as a crisp UI box (or, worse, selected text).
+ */
+function chiselStroke(
+  x0: number,
+  x1: number,
+  y0: number,
+  y1: number,
+  thick: number,
+  rand: () => number,
+): string {
+  const half = thick / 2;
+  const slant = thick * SWIPE_SLANT;
+  const bow = () => (rand() - 0.5) * thick * 0.3; // edge wobble, px
+  const midX = (x0 + x1) / 2;
+  const midY = (y0 + y1) / 2;
+  const fmt = (n: number) => n.toFixed(1);
+  // top edge left -> right, slanted right end, bottom edge right -> left, slanted left end
+  return [
+    `M${fmt(x0 + slant)} ${fmt(y0 - half)}`,
+    `Q${fmt(midX)} ${fmt(midY - half + bow())} ${fmt(x1 + slant)} ${fmt(y1 - half)}`,
+    `L${fmt(x1 - slant)} ${fmt(y1 + half)}`,
+    `Q${fmt(midX)} ${fmt(midY + half + bow())} ${fmt(x0 - slant)} ${fmt(y0 + half)}`,
+    "Z",
+  ].join(" ");
+}
+
+/**
+ * @description Builds one highlighter swipe across a w x h box: a fat main pass that
+ * drifts a hair up or down as it goes (nobody highlights level), and a thinner, shorter
+ * second pass slightly off-center, like going back over a spot.
+ */
+function swipePaths(w: number, h: number, seed: number): [string, string] {
+  const rand = seededRandom(seed + 101);
+  const drift = () => (rand() - 0.5) * h * 0.12;
+  const cy = h / 2;
+  const thick = h * SWIPE_THICKNESS;
+  const slant = thick * SWIPE_SLANT;
+
+  // inset by the slant so the leaning ends stay inside the box
+  const main = chiselStroke(slant, w - slant, cy + drift(), cy + drift(), thick, rand);
+  // the second pass sits above or below center and skips the very ends
+  const side = (rand() > 0.5 ? 1 : -1) * thick * 0.3;
+  const x0 = w * (0.05 + rand() * 0.08);
+  const x1 = w * (0.84 + rand() * 0.1);
+  const second = chiselStroke(x0, x1, cy + side + drift(), cy + side + drift(), thick * 0.5, rand);
+  return [main, second];
+}
+
+/**
+ * @description A highlighter swipe behind a word - marks "you are here" without looking
+ * like the hover pen loop. A clip sweeps it on left to right (main pass, then a quick
+ * second pass), and it simply fades on the way out, since you can't un-highlight. Ink
+ * comes from `currentColor`, so the caller picks the marker; `variant` seeds the shape.
+ * @author Chris "Mo" Mochinski
+ */
+export function ScribbleHighlight({
+  active,
+  variant,
+  className,
+  style,
+  delay = 0,
+}: ScribbleProps) {
+  const [ref, size] = useMeasuredBox();
+  const clipId = useId();
+  const paths = size ? swipePaths(size.w, size.h, variant) : null;
+
+  return (
+    <svg
+      ref={ref}
+      className={clsx(styles.scribble, className)}
+      style={style}
+      viewBox={size ? `0 0 ${size.w} ${size.h}` : undefined}
+      fill="none"
+      aria-hidden>
+      {size && paths && (
+        <>
+          <defs>
+            {paths.map((_, i) => (
+              <clipPath key={i} id={`${clipId}-${i}`}>
+                {/* the "felt tip" - a rect that grows rightward to reveal the stroke */}
+                <motion.rect
+                  x={0}
+                  y={0}
+                  height={size.h}
+                  initial={{ width: 0 }}
+                  animate={{ width: active ? size.w : 0 }}
+                  transition={
+                    active
+                      ? { duration: 0.32, delay: delay + i * 0.22, ease: "easeOut" }
+                      : { duration: 0, delay: 0.25 } // reset only after the fade is done
+                  }
+                />
+              </clipPath>
+            ))}
+          </defs>
+          {paths.map((d, i) => (
+            <motion.path
+              key={i}
+              d={d}
+              fill="currentColor"
+              clipPath={`url(#${clipId}-${i})`}
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: active ? (i === 0 ? SWIPE_OPACITY : SWIPE_SECOND_OPACITY) : 0,
+              }}
+              transition={{ duration: active ? 0.05 : 0.25, delay: active ? delay + i * 0.22 : 0 }}
+            />
+          ))}
+        </>
       )}
     </svg>
   );

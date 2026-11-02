@@ -1,0 +1,40 @@
+/* sky zone: main blurb floats above the tree. canvas-relative (0% = canvas top), same
+   neighborhood as the contact blurb - nudge `top` to taste */
+.privacyBlurb {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  translate: -50% 0;
+  width: min(64ch, 90cqi);
+  pointer-events: auto;
+  text-align: center;
+  text-wrap: balance;
+  font-weight: 200;
+  color: var(--color-text-body);
+
+  span.bizName {
+    font-weight: 600;
+  }
+}
+
+/* ground zone: fine print under the horizon. parked at the same depth as the contact
+   social row so the nav's hover loops + "?" doodles still have room to hang above it */
+.fineprint {
+  position: absolute;
+  bottom: 12%;
+  left: 50%;
+  translate: -50% 0;
+  width: min(56ch, 90cqi);
+  pointer-events: auto;
+  text-align: center;
+  text-wrap: balance;
+  font-size: clamp(11px, 1.2cqi, 13px);
+  font-weight: 200;
+  color: var(--color-text-body);
+  opacity: 0.75;
+
+  a {
+    color: inherit;
+    text-underline-offset: 0.12em;
+  }
+}

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { motion } from "motion/react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { Logo } from "../../components/Logo/logoIndex";
 import { NavRow } from "../../components/NavRow/navRowIndex";
 import { GarbageTruck } from "../../components/GarbageTruck/garbageTruckIndex";
@@ -76,6 +76,10 @@ export function SiteLayout() {
               transition={{ duration: 0.5, delay: 0.6 }}>
               notice: this site is very much under construction
             </motion.p>
+            {/* tiny on purpose - mostly here so Google's OAuth verification sees a policy link */}
+            <Link to="/privacy" className={styles.privacyLink}>
+              privacy
+            </Link>
         </div>
 
         {/* persistent across all shell routes - drives itself in on /rants, out elsewhere */}

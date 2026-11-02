@@ -8,6 +8,7 @@ import { Rants } from './routes/rants/rantsIndex'
 import { Things } from './routes/things/thingsIndex'
 import { Stuff } from './routes/stuff/stuffIndex'
 import { Contact } from './routes/contact/contactIndex'
+import { Privacy } from './routes/privacy/privacyIndex'
 
 const router = createBrowserRouter([
   { path: '/', element: <Landing /> },
@@ -20,6 +21,7 @@ const router = createBrowserRouter([
       { path: '/things', element: <Things /> },
       { path: '/stuff', element: <Stuff /> },
       { path: '/contact', element: <Contact /> },
+      { path: '/privacy', element: <Privacy /> },
     ],
   },
 ])

@@ -10,16 +10,19 @@ const TITLE_SCALE_NAV = 0.9;      // settled nav scale
 const TITLE_SPACING_HERO = "0.2em";
 const TITLE_SPACING_NAV = "0.12em";
 
+// each page owns a fixed highlighter ink from the sticky-note palette (fixed, never
+// random, so a color starts to feel like that page). the tomato note is skipped on
+// purpose - it's too strong behind small nav text to stay easily readable.
 const LEFT_ROUTES = [
-  { path: "/home", label: "Home" },
-  { path: "/about", label: "About" },
-  { path: "/contact", label: "Contact" },
+  { path: "/home", label: "Home", ink: "var(--sticky-note-yellow)" },
+  { path: "/about", label: "About", ink: "var(--sticky-note-green)" },
+  { path: "/contact", label: "Contact", ink: "var(--sticky-note-blue)" },
 ] as const;
 
 const RIGHT_ROUTES = [
-  { path: "/things", label: "Things" },
-  { path: "/stuff", label: "Stuff" },
-  { path: "/rants", label: "Rants" },
+  { path: "/things", label: "Things", ink: "var(--sticky-note-peach)" },
+  { path: "/stuff", label: "Stuff", ink: "var(--sticky-note-green)" },
+  { path: "/rants", label: "Rants", ink: "var(--sticky-note-yellow)" },
 ] as const;
 
 const ALL_ROUTES = [...LEFT_ROUTES, ...RIGHT_ROUTES];
@@ -36,8 +39,8 @@ interface NavRowProps {
 
 /**
  * @description Title row shared across all routes. "Wreck Shop" is center-locked
- * via CSS grid; route links flank it left and right. The active route stays circled
- * with a faint pen oval (see MagneticLink) - no extra elements, no opacity toggling.
+ * via CSS grid; route links flank it left and right. The active route gets a
+ * highlighter swipe in its own sticky-note color (see MagneticLink).
  * @author Chris "Mo" Mochinski
  */
 export function NavRow({ visible, hillFlat = false }: NavRowProps) {
@@ -58,6 +61,7 @@ export function NavRow({ visible, hillFlat = false }: NavRowProps) {
           isActive={isActive}
           magnetic={magnetic}
           index={ALL_ROUTES.indexOf(r)}
+          ink={r.ink}
         />
       </motion.div>
     );

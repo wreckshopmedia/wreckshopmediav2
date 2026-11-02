@@ -68,6 +68,26 @@
   pointer-events: none;
 }
 
+/* bottom-right whisper link, same type treatment as the construction notice */
+.privacyLink {
+  position: absolute;
+  bottom: 3dvh;
+  right: clamp(16px, 3vw, 40px);
+  font-family: var(--body);
+  font-size: clamp(11px, 1.6vw, 13px);
+  font-weight: 200;
+  color: var(--color-text-title);
+  opacity: 0.6;
+  text-decoration: none;
+  z-index: 20;
+
+  &:hover {
+    opacity: 1;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+}
+
 /*
   Overlays navAnchor exactly (top:0, 100%×100%), so it IS the pseudo-canvas: a real,
   bounded, viewport-centered coordinate space. Route content positions against THIS -

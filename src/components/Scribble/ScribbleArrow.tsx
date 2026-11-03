@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "motion/react";
 import type { Variants } from "motion/react";
 import { clsx } from "clsx";
@@ -156,6 +157,16 @@ interface ScribbleArrowProps {
  * @author Chris "Mo" Mochinski
  */
 export function ScribbleArrow({ active, picked, variant, className }: ScribbleArrowProps) {
+  // once picked, the svg stays dissolved until the next real hover. un-picking used to
+  // snap it straight back to visible, which flashed whatever ink the pieces still held
+  // on the page you just left (React's "adjust state on prop change" pattern again)
+  // one resolved target, not two competing setters - a link can be picked AND hovered for
+  // a render mid-navigation, and two ifs would ping-pong each other into a render loop
+  const [dissolved, setDissolved] = useState(picked);
+  const nextDissolved = active ? false : picked ? true : dissolved;
+  if (nextDissolved !== dissolved) setDissolved(nextDissolved);
+  const hidden = picked || dissolved;
+
   const setup = SETUPS[variant % SETUPS.length];
   const art = DOODLES[setup.doodle];
 
@@ -188,10 +199,10 @@ export function ScribbleArrow({ active, picked, variant, className }: ScribbleAr
       viewBox="0 0 100 100"
       aria-hidden
       // the blur lives on the svg itself (CSS filters on inner svg nodes are patchy).
-      // picking blurs it out; un-picking snaps it back clean so the next hover is crisp.
+      // picking blurs it out; the next hover snaps it back clean so the doodle is crisp.
       initial={false}
-      animate={picked ? { opacity: 0, filter: PICK_BLUR } : { opacity: 1, filter: "blur(0px)" }}
-      transition={picked ? { duration: PICK_OUT, ease: "easeOut" } : { duration: 0 }}>
+      animate={hidden ? { opacity: 0, filter: PICK_BLUR } : { opacity: 1, filter: "blur(0px)" }}
+      transition={hidden ? { duration: PICK_OUT, ease: "easeOut" } : { duration: 0 }}>
       {/* plain g holds the static placement transform so Motion never touches it;
           the motion.g inside only orchestrates the variants */}
       <g transform={transform}>

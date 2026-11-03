@@ -71,6 +71,10 @@ export function MagneticLink({ to, label, isActive, magnetic, index, ink }: Magn
   // the page you're already on shouldn't grab, pop, or react to the cursor - and
   // neither should anything on touch, where hover states just get stuck
   const interactive = magnetic && !isActive;
+  // a trackpad's flood of mousemoves can land one setHovered(true) AFTER the route
+  // commit, leaving the current page "hovered" behind the scenes. its doodle then drew
+  // itself invisibly and flashed when you left. never trust hover on a non-interactive link
+  const showHover = hovered && interactive;
 
   function handleMove(e: React.MouseEvent<HTMLSpanElement>) {
     const rect = ref.current?.getBoundingClientRect();
@@ -101,8 +105,8 @@ export function MagneticLink({ to, label, isActive, magnetic, index, ink }: Magn
       <motion.span
         className={styles.magInner}
         style={{ x, y }}
-        animate={{ scale: hovered ? HOVER_SCALE : 1 }}
-        transition={{ scale: hovered ? SCALE_SPRING_UP : SCALE_SPRING_DOWN }}>
+        animate={{ scale: showHover ? HOVER_SCALE : 1 }}
+        transition={{ scale: showHover ? SCALE_SPRING_UP : SCALE_SPRING_DOWN }}>
         <ScribbleHighlight
           active={CURRENT_MARK === "highlight" && isActive}
           variant={index}
@@ -126,7 +130,7 @@ export function MagneticLink({ to, label, isActive, magnetic, index, ink }: Magn
       {/* outside the magnet layer on purpose - the word drifts toward the cursor while the
           arrow stays put, still pointing at where it was written */}
       <ScribbleArrow
-        active={hovered}
+        active={showHover}
         picked={isActive}
         variant={index}
         className={styles.navArrow}

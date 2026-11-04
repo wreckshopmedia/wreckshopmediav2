@@ -35,6 +35,8 @@ interface NavRowProps {
   visible: boolean;
   /** When true, h1 skips its settle animation and mounts already in nav state (SiteLayout). */
   hillFlat?: boolean;
+  /** makes "Wreck Shop" a button - Landing uses it as a second reveal trigger, SiteLayout to go home */
+  onTitleClick?: () => void;
 }
 
 /**
@@ -43,7 +45,7 @@ interface NavRowProps {
  * highlighter swipe in its own sticky-note color (see MagneticLink).
  * @author Chris "Mo" Mochinski
  */
-export function NavRow({ visible, hillFlat = false }: NavRowProps) {
+export function NavRow({ visible, hillFlat = false, onTitleClick }: NavRowProps) {
   const { pathname } = useLocation();
   const magnetic = useHoverCapable();
 
@@ -83,13 +85,21 @@ export function NavRow({ visible, hillFlat = false }: NavRowProps) {
           scale: visible ? TITLE_SCALE_NAV : TITLE_SCALE_HERO,
           letterSpacing: visible ? TITLE_SPACING_NAV : TITLE_SPACING_HERO,
         }}
+        // springs on the landing reveal AND on the trip back home (SiteLayout hiding the
+        // links); only the settled SiteLayout mount snaps
         transition={
-          visible && !hillFlat
-            ? { type: "spring", stiffness: 100, damping: 18 }
-            : { duration: 0 }
+          visible === hillFlat
+            ? { duration: 0 }
+            : { type: "spring", stiffness: 100, damping: 18 }
         }
         style={{ transformBox: "fill-box" }}>
-        Wreck Shop
+        {onTitleClick ? (
+          <button type="button" className={styles.titleButton} onClick={onTitleClick}>
+            Wreck Shop
+          </button>
+        ) : (
+          "Wreck Shop"
+        )}
       </motion.h1>
       <div className={styles.linkGroup}>{RIGHT_ROUTES.map((r, i) => renderLink(r, i))}</div>
     </div>

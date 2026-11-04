@@ -5,23 +5,23 @@
   overflow: visible;
 }
 
-/* logo is only inside a <button> on the landing route - filter/hover are inert in SiteLayout */
+/* logo is only inside a <button> on the landing route - filter/hover are inert in SiteLayout.
+   hover on/off snaps on purpose (no transition) - only the click reveal eases */
 button .logo {
   filter: grayscale(0.2) brightness(1.08) saturate(0.7);
-  transition: filter 175ms ease-in;
+  transition: none;
 
   path[id*="sail"] {
-    transition: filter 175ms ease-in;
     filter: brightness(0.94) saturate(1.1);
   }
 
-  /* :not(.entered) prevents hover from fighting the entered state once clicked */
-  &:not(.entered):hover {
-    transition: filter 35ms linear;
+  /* lights up when ANY landing button is hovered - the logo or the "Wreck Shop" title
+     under it - so the pair acts like one big button. :not(.entered) keeps hover from
+     fighting the entered state once clicked */
+  :global(#landing):has(button:hover) &:not(.entered) {
     filter: grayscale(0.05) brightness(1.02) saturate(1.0);
 
     path[id*="sail"] {
-      transition: filter 35ms linear;
       filter: brightness(1.13) saturate(0.94);
     }
   }
@@ -40,3 +40,15 @@ button .logo {
   }
 }
 
+
+/* heading home to / - ease back into the landing button's muted filter so the swap to the
+   splash page doesn't snap colors. values mirror `button .logo` above, keep them in sync */
+.logo.leaving {
+  transition: filter 500ms ease-in;
+  filter: grayscale(0.2) brightness(1.08) saturate(0.7);
+
+  path[id*="sail"] {
+    transition: filter 500ms ease-in;
+    filter: brightness(0.94) saturate(1.1);
+  }
+}

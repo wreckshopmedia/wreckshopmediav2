@@ -80,6 +80,7 @@
   opacity: 0.6;
   text-decoration: none;
   z-index: 20;
+  transition: opacity 0.3s ease-out; /* fades with the notice on the trip home */
 
   &:hover {
     opacity: 1;

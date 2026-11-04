@@ -20,14 +20,22 @@ interface LogoProps {
   isRevealing?: boolean;
   /** when true, hill starts already flat - used on all non-landing routes */
   hillFlat?: boolean;
+  /** when true, plays the reveal backwards (hill puffs back up) on the way home to / */
+  isLeaving?: boolean;
 }
 
 /**
  * @description Wreck Shop SVG logo. When isRevealing is true, the hill flattens upward
- * into a wide horizontal line. Pass hillFlat to render it pre-flattened (non-landing routes).
+ * into a wide horizontal line. Pass hillFlat to render it pre-flattened (non-landing routes),
+ * and isLeaving to puff the hill back up so it lands exactly on the landing page's start.
  * @author Chris "Mo" Mochinski
  */
-export function Logo({ onReady, isRevealing = false, hillFlat = false }: LogoProps) {
+export function Logo({
+  onReady,
+  isRevealing = false,
+  hillFlat = false,
+  isLeaving = false,
+}: LogoProps) {
   const { animationsEnabled } = useReducedMotion();
   const hillControls = useAnimation();
 
@@ -54,13 +62,33 @@ export function Logo({ onReady, isRevealing = false, hillFlat = false }: LogoPro
     }
   }, [isRevealing, animationsEnabled, hillControls]);
 
+  // the reveal in reverse - width pulls in first, then the hill pops back up out of the line
+  useEffect(() => {
+    if (isLeaving && animationsEnabled) {
+      void hillControls.start({
+        scaleY: 1,
+        scaleX: 1,
+        strokeWidth: 3,
+        transition: {
+          scaleX: { duration: 0.5, ease: "easeIn" },
+          scaleY: { duration: 0.3, delay: 0.2, ease: "easeOut" },
+          strokeWidth: { duration: 0.35, delay: 0.15, ease: "easeOut" },
+        },
+      });
+    }
+  }, [isLeaving, animationsEnabled, hillControls]);
+
   return (
     // figma re-exported this art on a bigger padded canvas (473x672), so the viewBox crops
     // back to the original 381x615 frame - keeps the ground line flush with the box bottom
     // and the logo the same on-screen size. offset = the padding figma added (left 40, top 13.5)
     <svg
       id="logo-svg"
-      className={clsx(styles.logo, (isRevealing || hillFlat) && styles.entered)}
+      className={clsx(
+        styles.logo,
+        (isRevealing || hillFlat) && !isLeaving && styles.entered,
+        isLeaving && styles.leaving,
+      )}
       viewBox="40.03 13.52 381 615"
       fill="none"
       xmlns="http://www.w3.org/2000/svg">
@@ -68,9 +96,14 @@ export function Logo({ onReady, isRevealing = false, hillFlat = false }: LogoPro
         {/* boat + tree scale toward bottom center on reveal; hill is independent */}
         <motion.g
           id="boat-tree-content"
-          animate={{ scale: isRevealing ? SCALE_NAV : hillFlat ? SCALE_NAV : SCALE_HERO }}
+          // mount straight at the target scale - without this Motion paints one frame at
+          // scale(1) first, which flashed a tiny tree when landing mounted mid-trip home
+          initial={false}
+          animate={{
+            scale: isLeaving ? SCALE_HERO : isRevealing || hillFlat ? SCALE_NAV : SCALE_HERO,
+          }}
           transition={
-            isRevealing
+            isRevealing || isLeaving
               ? { type: 'spring', stiffness: SPRING_STIFFNESS, damping: SPRING_DAMPING }
               : { duration: 0 }
           }

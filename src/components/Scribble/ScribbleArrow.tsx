@@ -88,10 +88,10 @@ const DOT_RADIUS_EM = 0.09;
 
 // the drawing order: ? curl, its dot, the arrow shaft, then the barbs. [delay, duration]
 const TIMING = {
-  q: [0, 0.16],
-  dot: [0.16, 0.04],
-  line: [0.2, 0.18],
-  head: [0.38, 0.1],
+  q: [0, 0.135],
+  dot: [0.135, 0.035],
+  line: [0.17, 0.12],
+  head: [0.29, 0.07],
 } as const;
 const FADE_OUT = 0.12; // hover-off: a quick, plain fade
 // click: the doodle blurs and dissolves instead - "never mind the ?, I picked it" - slow

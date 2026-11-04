@@ -1,11 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Logo } from "../../components/Logo/logoIndex";
 import { NavRow } from "../../components/NavRow/navRowIndex";
-import { GarbageTruck } from "../../components/GarbageTruck/garbageTruckIndex";
+import {
+  GarbageTruck,
+  TRUCK_EXIT_MS,
+  TRUCK_ROUTE,
+} from "../../components/GarbageTruck/garbageTruckIndex";
 import { RouteContext } from "../../context/routeContextIndex";
 import { TruckProvider } from "../../context/truckContextIndex";
+import { useReducedMotion } from "../../context/ReducedMotionContext";
 import { scratchpad } from "../../utils/scratchpad";
 import styles from "./siteLayout.module.css";
 
@@ -14,6 +19,10 @@ import styles from "./siteLayout.module.css";
 const LOGO_ROUTE_FX: Record<string, { opacity: number; filter: string }> = {};
 
 const DEFAULT_LOGO_FX = { opacity: 1, filter: "blur(0px)" };
+
+// the reverse reveal (links out, title grows, hill puffs back up) settles by ~0.75s -
+// hand off to the landing route right after so it mounts on the exact same frame state
+const HOME_DELAY_MS = 800;
 
 /**
  * @description Full-viewport shell for all non-landing routes. The navAnchor is a
@@ -25,6 +34,22 @@ const DEFAULT_LOGO_FX = { opacity: 1, filter: "blur(0px)" };
  */
 export function SiteLayout() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { animationsEnabled } = useReducedMotion();
+  const [leaving, setLeaving] = useState(false);
+
+  /** @description Plays the landing reveal backwards, then drops back onto the splash page. */
+  const handleTitleClick = () => {
+    if (leaving) return;
+    if (!animationsEnabled) {
+      navigate("/");
+      return;
+    }
+    setLeaving(true);
+    // from /rants, hang on until the truck has driven fully off screen
+    const delay = pathname === TRUCK_ROUTE ? Math.max(HOME_DELAY_MS, TRUCK_EXIT_MS + 50) : HOME_DELAY_MS;
+    setTimeout(() => navigate("/"), delay);
+  };
 
   useEffect(() => {
     scratchpad(
@@ -48,12 +73,12 @@ export function SiteLayout() {
             className={styles.logoWrapper}
             animate={LOGO_ROUTE_FX[pathname] ?? DEFAULT_LOGO_FX}
             transition={{ duration: 0.27, ease: "easeIn" }}>
-            <Logo hillFlat />
+            <Logo hillFlat isLeaving={leaving} />
           </motion.div>
           {/* wrapper is the positioning context so the notice can pin just under
               the nav row without adding height to the centered navAnchor flow */}
           <div className={styles.navRowWrap}>
-            <NavRow visible hillFlat />
+            <NavRow visible={!leaving} hillFlat onTitleClick={handleTitleClick} />
           </div>
 
           {/* canvas is inside navAnchor - zones offset from nav, not viewport corners */}
@@ -63,8 +88,8 @@ export function SiteLayout() {
             id="main"
             className={styles.contentCanvas}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.35, ease: "easeIn" }}>
+            animate={{ opacity: leaving ? 0 : 1 }}
+            transition={{ duration: leaving ? 0.25 : 0.35, ease: leaving ? "easeOut" : "easeIn" }}>
             <Outlet />
 
           </motion.main>
@@ -72,18 +97,21 @@ export function SiteLayout() {
             <motion.p
               className={styles.constructionNotice}
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.9 }}
-              transition={{ duration: 0.5, delay: 0.6 }}>
+              animate={{ opacity: leaving ? 0 : 0.9 }}
+              transition={leaving ? { duration: 0.3 } : { duration: 0.5, delay: 0.6 }}>
               notice: this site is very much under construction
             </motion.p>
             {/* tiny on purpose - mostly here so Google's OAuth verification sees a policy link */}
-            <Link to="/privacy" className={styles.privacyLink}>
+            <Link
+              to="/privacy"
+              className={styles.privacyLink}
+              style={leaving ? { opacity: 0 } : undefined}>
               privacy
             </Link>
         </div>
 
         {/* persistent across all shell routes - drives itself in on /rants, out elsewhere */}
-        <GarbageTruck />
+        <GarbageTruck departing={leaving} />
       </TruckProvider>
     </RouteContext.Provider>
   );

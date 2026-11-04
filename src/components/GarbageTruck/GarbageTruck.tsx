@@ -7,9 +7,8 @@ import { GarbageTruckArt } from "./GarbageTruckArt";
 import stevenSrc from "../../assets/steven-no-bg.png";
 import hotdogSrc from "../../assets/hotdog-no-bg.png";
 import styles from "./garbageTruck.module.css";
+import { DRIVE, TRUCK_ROUTE } from "./garbageTruckConstants";
 
-// the route the truck is "for" - it reverses in here and drives away on leaving.
-const TRUCK_ROUTE = "/rants";
 
 // the chomp: yank the pull-lever clockwise (to the right) around its pivot, hold at
 // the pull while the packer "cycles", then release back to rest. positive = clockwise.
@@ -133,14 +132,6 @@ const DOCK_X = "-50%";
 // (50vw always exceeds half the leftover margin), so the truck fully hides before driving.
 const AWAY_X = "calc(-100% - 50vw)";
 
-// the drive curves, shared so the WHEELS can roll on the EXACT same easing + duration
-// as the truck body - that's what stops the wheels from outpacing the decelerating
-// truck on arrival. bezier kept as a tuple: Motion's transition wants the array form,
-// WAAPI wants a cubic-bezier() string (cssBezier below).
-const DRIVE = {
-  in: { ms: 1200, bezier: [0.22, 0.61, 0.36, 1] as const }, // reverse IN: decelerate to dock
-  out: { ms: 950, bezier: [0.5, 0, 0.85, 0.35] as const }, // drive AWAY: accelerate off
-};
 const cssBezier = (b: readonly number[]) => `cubic-bezier(${b[0]}, ${b[1]}, ${b[2]}, ${b[3]})`;
 
 // whole turns the wheels roll across one drive (integer so each ends back at its rest
@@ -167,14 +158,16 @@ const WHEELS = [
  * The artwork is GarbageTruckArt (converted from Figma). Animations targeting its
  * group ids (wheel spin, lever chomp, glass roll-down, note swallow) come next - for
  * now it renders static while the stage/drive/hopper-hitbox are already live.
+ * `departing` sends it off early while the route hasn't changed yet (the trip home).
  * @author Chris "Mo" Mochinski
  */
-export function GarbageTruck() {
+export function GarbageTruck({ departing = false }: { departing?: boolean }) {
   const { pathname } = useRouteContext();
   const { animationsEnabled } = useReducedMotion();
   const { compactorRef, setParked, hopperArmed, ingestNonce, ingestColor } = useTruck();
 
-  const onRoute = pathname === TRUCK_ROUTE;
+  // departing = SiteLayout is mid trip-home to / - drive away now, the route catches up later
+  const onRoute = pathname === TRUCK_ROUTE && !departing;
   const truckRef = useRef<HTMLDivElement>(null);
   // true while the window glass is mid-roll OR in its post-roll cooldown. the single guard
   // that prevents click/auto-peek collisions, spam clicks, and clicking while it's down.

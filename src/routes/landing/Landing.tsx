@@ -28,7 +28,7 @@ export function Landing() {
   }
 
   return (
-    <div className={styles.landing}>
+    <div className={styles.landing} id="landing">
       <button
         className={styles.landingButton}
         onClick={handleClick}
@@ -36,7 +36,12 @@ export function Landing() {
       >
         <Logo onReady={handleReady} isRevealing={phase === 'revealed'} />
       </button>
-      <NavRow visible={phase === 'revealed'} />
+      {/* the title is a second trigger so logo + text read as one big button. only a
+          button while ready - before that and after the click it's plain text again */}
+      <NavRow
+        visible={phase === 'revealed'}
+        onTitleClick={phase === 'ready' ? handleClick : undefined}
+      />
     </div>
   )
 }

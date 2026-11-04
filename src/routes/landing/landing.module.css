@@ -26,7 +26,8 @@
     pointer-events: none;
   }
 
-  &:hover {
+  /* richer palette whenever the logo OR the title under it is hovered (see logo.module.css) */
+  .landing:has(button:hover) & {
     --light-green: var(--rich-light-green);
     --light-brown: var(--rich-light-brown);
     --light-blue: var(--rich-light-blue);

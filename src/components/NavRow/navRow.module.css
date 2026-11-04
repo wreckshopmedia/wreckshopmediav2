@@ -30,6 +30,17 @@
   padding: 0 calc(0.25rem + 1vw);
 }
 
+/* the secret way home - a bare button that inherits the h1's type like it isn't there */
+.titleButton {
+  all: unset;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 1px dashed currentColor;
+    outline-offset: 0.2em;
+  }
+}
+
 /* magnetic hit area - padded bigger than the text so the pull starts before the
    cursor reaches it; negative margin cancels the padding so nav spacing is unchanged */
 .magWrap {

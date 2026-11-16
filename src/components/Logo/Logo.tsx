@@ -2,20 +2,31 @@ import { useEffect, useRef } from "react";
 import { motion, useAnimation } from "motion/react";
 import clsx from "clsx";
 import { useReducedMotion } from "../../context/ReducedMotionContext";
+import {
+  DEFAULT_LOGO_CONTENT_FX,
+  HILL_ORIGIN_Y,
+  HILL_SCALE_X,
+  HILL_SCALE_Y,
+  LOGO_VIEWBOX,
+  type LogoContentFx,
+} from "./logoConstants";
 import styles from "./logo.module.css";
 
 // tunable visual constants - change these before digging into the JSX
 const SCALE_HERO = 1.15;    // logo scale on the landing page (inflated, pre-click)
 const SCALE_NAV = 1.0;     // logo scale once in the nav - the natural resting size
 
-const HILL_SCALE_X = 5;  // how wide the hill spreads during the flatten
-const HILL_SCALE_Y = 0.25;  // how flat the hill gets
 const HILL_STROKE = 12;    // stroke width at peak hill flatten
 
 const SPRING_STIFFNESS = 120;
 const SPRING_DAMPING = 25;
 
+const CONTENT_BLUR_ID = "logo-content-blur";
+const CONTENT_FX_TRANSITION = { duration: 0.27, ease: "easeIn" } as const;
+
 interface LogoProps {
+  /** fades/blurs the boat + tree (not the hill) - SiteLayout drives this per route */
+  contentFx?: LogoContentFx;
   onReady?: () => void;
   isRevealing?: boolean;
   /** when true, hill starts already flat - used on all non-landing routes */
@@ -28,6 +39,7 @@ interface LogoProps {
  * @description Wreck Shop SVG logo. When isRevealing is true, the hill flattens upward
  * into a wide horizontal line. Pass hillFlat to render it pre-flattened (non-landing routes),
  * and isLeaving to puff the hill back up so it lands exactly on the landing page's start.
+ * contentFx fades and blurs the boat + tree per route while the hill stays crisp.
  * @author Chris "Mo" Mochinski
  */
 export function Logo({
@@ -35,6 +47,7 @@ export function Logo({
   isRevealing = false,
   hillFlat = false,
   isLeaving = false,
+  contentFx = DEFAULT_LOGO_CONTENT_FX,
 }: LogoProps) {
   const { animationsEnabled } = useReducedMotion();
   const hillControls = useAnimation();
@@ -89,7 +102,7 @@ export function Logo({
         (isRevealing || hillFlat) && !isLeaving && styles.entered,
         isLeaving && styles.leaving,
       )}
-      viewBox="40.03 13.52 381 615"
+      viewBox={LOGO_VIEWBOX.join(" ")}
       fill="none"
       xmlns="http://www.w3.org/2000/svg">
       <g id="TREE IDEA">
@@ -101,12 +114,16 @@ export function Logo({
           initial={false}
           animate={{
             scale: isLeaving ? SCALE_HERO : isRevealing || hillFlat ? SCALE_NAV : SCALE_HERO,
+            opacity: contentFx.opacity,
           }}
-          transition={
-            isRevealing || isLeaving
+          transition={{
+            ...(isRevealing || isLeaving
               ? { type: 'spring', stiffness: SPRING_STIFFNESS, damping: SPRING_DAMPING }
-              : { duration: 0 }
-          }
+              : { duration: 0 }),
+            opacity: CONTENT_FX_TRANSITION,
+          }}
+          // only nav routes get the blur filter - landing never needs it, so skip the cost
+          filter={hillFlat ? `url(#${CONTENT_BLUR_ID})` : undefined}
           style={{ transformBox: 'fill-box', originX: '50%', originY: '100%' }}
         >
           <g id="BOAT">
@@ -284,7 +301,7 @@ export function Logo({
           id="HILL"
           animate={hillControls}
           initial={hillFlat ? { scaleY: HILL_SCALE_Y, scaleX: HILL_SCALE_X, strokeWidth: HILL_STROKE } : { strokeWidth: 3 }}
-          style={{ transformBox: 'fill-box', originX: '50%', originY: '20%' }}
+          style={{ transformBox: 'fill-box', originX: '50%', originY: `${HILL_ORIGIN_Y * 100}%` }}
         >
           {/* no strokeWidth here on purpose - the parent group's animated value inherits down */}
           <path
@@ -296,6 +313,16 @@ export function Logo({
         </motion.g>
       </g>
       <defs>
+        {/* SVG filter instead of CSS `filter: blur()` because Safari ignores CSS filters on
+            inner SVG elements. roomy region so the blur doesn't get clipped at the bbox */}
+        <filter id={CONTENT_BLUR_ID} x="-25%" y="-25%" width="150%" height="150%">
+          <motion.feGaussianBlur
+            initial={false}
+            // floor at a hair above 0 - older specs read stdDeviation=0 as "render nothing"
+            animate={{ stdDeviation: Math.max(contentFx.blur, 0.01) }}
+            transition={CONTENT_FX_TRANSITION}
+          />
+        </filter>
         <linearGradient
           id="paint0_linear_3045_876"
           x1="220.523"

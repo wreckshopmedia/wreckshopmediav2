@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import { RootedPlant } from "../../components/Plant/plantIndex";
 import styles from "./about.module.css";
 
@@ -10,13 +9,13 @@ import styles from "./about.module.css";
 export function About() {
   return (
     <>
-      {/* POC: a couple plants sprout on route enter (remount = fresh grow). drop pins
-          the stem base to the hill line; offset places them flanking the logo. heads up -
-          the hill line rides with the logo's height, so retune drop if .logo width changes. */}
+      {/* a couple plants sprout on route enter (remount = fresh grow). RootedPlant measures
+          the real hill curve under each one, so offset is the only placement knob - drop is
+          just the fallback if the hill can't be found. */}
       <RootedPlant
         side="left"
         drop={104}
-        offset="clamp(7rem, 20vw, 13rem)"
+        offset="clamp(2rem, 6vw, 4.5rem)"
         growDuration={1}
         height={0.7}
         size="120px"
@@ -28,7 +27,7 @@ export function About() {
       <RootedPlant
         side="left"
         drop={104}
-        offset="clamp(8rem, 22vw, 14rem)"
+        offset="clamp(3rem, 8vw, 5.5rem)"
         growDuration={1.7}
         height={1.1}
         size="124px"
@@ -40,7 +39,7 @@ export function About() {
       <RootedPlant
         side="right"
         drop={104}
-        offset="clamp(7rem, 20vw, 13rem)"
+        offset="clamp(2rem, 6vw, 4.5rem)"
         delay={1}
         growDuration={1}
         size="140px"
@@ -50,9 +49,8 @@ export function About() {
         leafSize={0.8}
       />
 
-      <div className={clsx(styles.aboutBlurb, styles.leftBlurb)}>
-       
-          <p>
+      <div className={styles.bioStack}>
+        <p>
             <span className={styles.bizName}>Wreck Shop Media</span> was officially founded &
             registered in 2022 by a nerdy dude who tried to trick people he was all rock and roll
             and stuff. Chris "Mo" Mochinski was born in Minneapolis back in the 1900s, and was
@@ -60,11 +58,7 @@ export function About() {
             elementary school. By age 14, he was typing 80+ WPM (formally tested) before high
             school. By age 17, Mo was building rudimentary websites for his band and others.
           </p>
-     
-      </div>
-      <div className={clsx(styles.aboutBlurb, styles.rightBlurb)}>
-      
-          <p>
+        <p>
             When Mo isn't tearing through code, you may catch him doing something musical, pursuing
             his private pilot's license, or on an adventure with his stepkid. Please also note that
             Mo is the worst basketball player of all time, he loves airports an unprecedented
@@ -72,7 +66,6 @@ export function About() {
             sleep...a thing he finds tragically boring and wouldn't do if his body didn't need it.
             The sleep, not the toast.
           </p>
-       
       </div>
     </>
   );

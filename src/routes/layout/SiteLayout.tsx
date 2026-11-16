@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Logo } from "../../components/Logo/logoIndex";
+import {
+  DEFAULT_LOGO_CONTENT_FX,
+  Logo,
+  type LogoContentFx,
+} from "../../components/Logo/logoIndex";
 import { NavRow } from "../../components/NavRow/navRowIndex";
 import {
   GarbageTruck,
@@ -12,13 +16,15 @@ import { RouteContext } from "../../context/routeContextIndex";
 import { TruckProvider } from "../../context/truckContextIndex";
 import { useReducedMotion } from "../../context/ReducedMotionContext";
 import { scratchpad } from "../../utils/scratchpad";
+import { useFavicon } from "../../hooks/useFavicon";
 import styles from "./siteLayout.module.css";
 
-// per-route logo visual overrides - add entries here for more weird states
-// (e.g. "/rants": { opacity: 0.7, filter: "blur(1px)" }). empty = no route tweaks.
-const LOGO_ROUTE_FX: Record<string, { opacity: number; filter: string }> = {};
-
-const DEFAULT_LOGO_FX = { opacity: 1, filter: "blur(0px)" };
+// per-route boat-tree overrides (the hill/ground stays crisp) - add entries for more weird
+// states. blur is in SVG viewBox units, roughly 2 units per screen px at nav size.
+const LOGO_ROUTE_FX: Partial<Record<string, LogoContentFx>> = {
+  // bios sit right on top of the boat-tree, so it fades + fogs into a backdrop
+  "/about": { opacity: 0.3, blur: 6 },
+};
 
 // the reverse reveal (links out, title grows, hill puffs back up) settles by ~0.75s -
 // hand off to the landing route right after so it mounts on the exact same frame state
@@ -37,6 +43,7 @@ export function SiteLayout() {
   const navigate = useNavigate();
   const { animationsEnabled } = useReducedMotion();
   const [leaving, setLeaving] = useState(false);
+  useFavicon();
 
   /** @description Plays the landing reveal backwards, then drops back onto the splash page. */
   const handleTitleClick = () => {
@@ -69,12 +76,14 @@ export function SiteLayout() {
         <div className={styles.siteLayout} id="site-layout">
         {/* navAnchor is the coordinate origin for all zone content */}
         <div className={styles.navAnchor} id="nav-anchor">
-          <motion.div
-            className={styles.logoWrapper}
-            animate={LOGO_ROUTE_FX[pathname] ?? DEFAULT_LOGO_FX}
-            transition={{ duration: 0.27, ease: "easeIn" }}>
-            <Logo hillFlat isLeaving={leaving} />
-          </motion.div>
+          <div className={styles.logoWrapper}>
+            {/* clear the fx on the trip home so landing's fresh logo doesn't snap from faded */}
+            <Logo
+              hillFlat
+              isLeaving={leaving}
+              contentFx={leaving ? DEFAULT_LOGO_CONTENT_FX : LOGO_ROUTE_FX[pathname]}
+            />
+          </div>
           {/* wrapper is the positioning context so the notice can pin just under
               the nav row without adding height to the centered navAnchor flow */}
           <div className={styles.navRowWrap}>

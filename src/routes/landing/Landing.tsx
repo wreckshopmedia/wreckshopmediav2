@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Logo } from '../../components/Logo/logoIndex'
 import { NavRow } from '../../components/NavRow/navRowIndex'
 import { useReducedMotion } from '../../context/ReducedMotionContext'
+import { useFavicon } from '../../hooks/useFavicon'
 import styles from './landing.module.css'
 
 type Phase = 'animating' | 'ready' | 'revealed'
@@ -18,6 +19,7 @@ const NAV_DELAY_MS = 850
 export function Landing() {
   const { animationsEnabled } = useReducedMotion()
   const navigate = useNavigate()
+  useFavicon()
   const [phase, setPhase] = useState<Phase>(animationsEnabled ? 'animating' : 'ready')
 
   const handleReady = () => setPhase('ready')

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "dev:all": "concurrently -n FRONTEND,BACKEND -c blue,green \"npm run dev\" \"npm run dev --prefix ../wreckshopmediav2-server\"",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && npm run prerender",
+    "prerender": "node scripts/prerender.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "typecheck": "tsc -b",
@@ -33,6 +34,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "playwright": "^1.65.1",
     "postcss": "^8.5.15",
     "postcss-preset-env": "^11.3.0",
     "prettier": "^3.8.4",

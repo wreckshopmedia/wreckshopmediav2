@@ -4,6 +4,8 @@ import { Logo } from '../../components/Logo/logoIndex'
 import { NavRow } from '../../components/NavRow/navRowIndex'
 import { useReducedMotion } from '../../context/ReducedMotionContext'
 import { useFavicon } from '../../hooks/useFavicon'
+import { useRouteMeta } from '../../hooks/useRouteMeta'
+import { SrIntro } from '../../components/SrIntro/srIntroIndex'
 import styles from './landing.module.css'
 
 type Phase = 'animating' | 'ready' | 'revealed'
@@ -20,6 +22,7 @@ export function Landing() {
   const { animationsEnabled } = useReducedMotion()
   const navigate = useNavigate()
   useFavicon()
+  useRouteMeta()
   const [phase, setPhase] = useState<Phase>(animationsEnabled ? 'animating' : 'ready')
 
   const handleReady = () => setPhase('ready')
@@ -31,6 +34,7 @@ export function Landing() {
 
   return (
     <div className={styles.landing} id="landing">
+      <SrIntro />
       <button
         className={styles.landingButton}
         onClick={handleClick}

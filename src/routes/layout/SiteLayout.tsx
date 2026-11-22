@@ -17,6 +17,8 @@ import { TruckProvider } from "../../context/truckContextIndex";
 import { useReducedMotion } from "../../context/ReducedMotionContext";
 import { scratchpad } from "../../utils/scratchpad";
 import { useFavicon } from "../../hooks/useFavicon";
+import { useRouteMeta } from "../../hooks/useRouteMeta";
+import { SrIntro } from "../../components/SrIntro/srIntroIndex";
 import styles from "./siteLayout.module.css";
 
 // per-route boat-tree overrides (the hill/ground stays crisp) - add entries for more weird
@@ -44,6 +46,7 @@ export function SiteLayout() {
   const { animationsEnabled } = useReducedMotion();
   const [leaving, setLeaving] = useState(false);
   useFavicon();
+  useRouteMeta();
 
   /** @description Plays the landing reveal backwards, then drops back onto the splash page. */
   const handleTitleClick = () => {
@@ -99,6 +102,7 @@ export function SiteLayout() {
             initial={{ opacity: 0 }}
             animate={{ opacity: leaving ? 0 : 1 }}
             transition={{ duration: leaving ? 0.25 : 0.35, ease: leaving ? "easeOut" : "easeIn" }}>
+            <SrIntro />
             <Outlet />
 
           </motion.main>

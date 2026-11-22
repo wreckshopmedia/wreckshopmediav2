@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { useLocation } from "react-router-dom";
 import { useHoverCapable } from "../../hooks/useHoverCapable";
 import { MagneticLink } from "./MagneticLink";
+import { SrOnly } from "../SrIntro/srIntroIndex";
 import styles from "./navRow.module.css";
 
 // tunable h1 animation values
@@ -95,10 +96,12 @@ export function NavRow({ visible, hillFlat = false, onTitleClick }: NavRowProps)
         style={{ transformBox: "fill-box" }}>
         {onTitleClick ? (
           <button type="button" className={styles.titleButton} onClick={onTitleClick}>
-            Wreck Shop
+            Wreck Shop<SrOnly> Media</SrOnly>
           </button>
         ) : (
-          "Wreck Shop"
+          <>
+            Wreck Shop<SrOnly> Media</SrOnly>
+          </>
         )}
       </motion.h1>
       <div className={styles.linkGroup}>{RIGHT_ROUTES.map((r, i) => renderLink(r, i))}</div>

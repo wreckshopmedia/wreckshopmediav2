@@ -1,0 +1,14 @@
+/* sky zone, same neighborhood as the privacy + contact blurbs so a 404 feels like any other
+   little viewport instead of an error screen */
+.notFound {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  translate: -50% 0;
+  width: min(40ch, 90cqi);
+  pointer-events: auto;
+  text-align: center;
+  text-wrap: balance;
+  font-weight: 200;
+  color: var(--color-text-body);
+}

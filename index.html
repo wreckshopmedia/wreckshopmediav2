@@ -4,7 +4,12 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wreck Shop Media</title>
+    <meta name="theme-color" content="#d6efff" />
+    <!-- seo:head -->
+    <!-- the build bakes each page's content into #root for text-only crawlers (scripts/prerender.mjs).
+         it stays invisible until React swaps in the real animated page, so nothing flashes -->
+    <style>.prerender-snapshot { visibility: hidden; }</style>
+    <noscript><style>.prerender-snapshot { visibility: visible; }</style></noscript>
   </head>
   <body>
     <div id="root"></div>

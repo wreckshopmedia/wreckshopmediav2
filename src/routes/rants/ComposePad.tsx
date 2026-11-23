@@ -1,9 +1,18 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { scratchpad } from "../../utils/scratchpad";
+import {
+  inkFor,
+  noteAuthorOpacity,
+  noteFontSize,
+  noteInnerPadding,
+  noteLineHeight,
+  noteOpacity,
+} from "./stickyHelpers";
 import styles from "./stickyBoard.module.css";
 
 const MAX_RANT_LENGTH = 200;
+const RANT_PLACEHOLDER = "scribble a rant...";
 
 interface ComposePadProps {
   nextColor: string;
@@ -24,6 +33,11 @@ export function ComposePad({ nextColor, onStick, onCycleColor }: ComposePadProps
   const [name, setName] = useState("");
   const [peeled, setPeeled] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // size + ink mirror a placed note so the pad previews the stuck result. empty pad sizes
+  // off the placeholder, so even the hint reads like a real (very short) rant would
+  const sizingLen = text.length || RANT_PLACEHOLDER.length;
+  const ink = inkFor(nextColor);
 
   async function stickIt() {
     if (!text.trim() || submitting) return;
@@ -62,13 +76,23 @@ export function ComposePad({ nextColor, onStick, onCycleColor }: ComposePadProps
           className={styles.composeTextarea}
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, MAX_RANT_LENGTH))}
-          placeholder="scribble a rant..."
+          placeholder={RANT_PLACEHOLDER}
           rows={4}
+          style={{
+            fontSize: noteFontSize(sizingLen),
+            lineHeight: noteLineHeight(sizingLen),
+            padding: noteInnerPadding(sizingLen),
+            color: `color(from var(${ink}) srgb r g b / ${noteOpacity(sizingLen)})`,
+          }}
           disabled={submitting}
         />
         <div className={styles.composeFooter}>
           {/* fixed "-" prefix sits outside the input so it's always there, not editable */}
-          <span className={styles.nameField}>
+          <span
+            className={styles.nameField}
+            style={{
+              color: `color(from var(${ink}) srgb r g b / ${noteAuthorOpacity(sizingLen)})`,
+            }}>
             <span className={styles.namePrefix} aria-hidden>
               -
             </span>

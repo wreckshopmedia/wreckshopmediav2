@@ -2,7 +2,16 @@ import { useEffect, useRef } from "react";
 import { animate, motion, useMotionValue, useSpring, useTransform, useVelocity } from "motion/react";
 import type { PanInfo } from "motion/react";
 import type { Rant } from "../../hooks/useRants";
-import { clamp, pointInRect } from "./stickyHelpers";
+import {
+  clamp,
+  inkFor,
+  noteAuthorOpacity,
+  noteFontSize,
+  noteInnerPadding,
+  noteLineHeight,
+  noteOpacity,
+  pointInRect,
+} from "./stickyHelpers";
 import styles from "./stickyBoard.module.css";
 
 // drag velocity (px/s) at which the note leans the full LEAN_MAX_DEG. real drags
@@ -28,61 +37,6 @@ const GRAB_LEAN_DEG = 10;
  */
 function setNoteDragging(on: boolean): void {
   document.documentElement.toggleAttribute("data-note-dragging", on);
-}
-
-/* TODO revisit font sizes when more done */
-
-/** @description Picks a font-size for the note text based on rant length. */
-function noteFontSize(len: number): string {
-  if (len <= 12) return "30cqi"; // super short - go big
-  if (len <= 30) return "21cqi";
-  if (len <= 80) return "13cqi";
-  if (len <= 140) return "11cqi";
-  return "9.5cqi";
-}
-
-/**
- * @description Note text opacity change based on rant length.
- * shorter text = more see-through
- */
-function noteOpacity(len: number): number {
-  if (len <= 12) return 0.7;
-  if (len <= 30) return 0.8;
-  if (len <= 80) return 0.9;
-  if (len <= 140) return 1;
-  return 1;
-}
-
-// the author signature tracks the body-text opacity but sits this much fainter at every
-// length, so the name always reads a quiet step behind the rant itself.
-const AUTHOR_OPACITY_OFFSET = 0.2;
-
-/** @description Author signature opacity - the body-text opacity, a touch more see-through. */
-function noteAuthorOpacity(len: number): number {
-  return noteOpacity(len) - AUTHOR_OPACITY_OFFSET;
-}
-
-/** @description Picks a line-height for the note text based on rant length. */
-function noteLineHeight(len: number): string {
-  if (len <= 12) return "0.9em";
-  if (len <= 30) return "1em";
-  if (len <= 80) return "1em";
-  if (len <= 140) return "1em";
-  return "1.125em";
-}
-
-/**
- * @description Some typefaces are getting cut off on the edges. Larger = a little
- * padding, small = not needed. This is probably partially due to dynamic line
- * height. Note that this is INNER padding (on the text element itself).
- * > 🚗 PARKED, may need adjustments later but, for now, ret 0
- */
-function noteInnerPadding(len: number): string {
-  if (len <= 12) return "0";
-  if (len <= 30) return "0";
-  if (len <= 80) return "0";
-  if (len <= 140) return "0";
-  return "0";
 }
 
 interface StickyNoteProps {
@@ -219,6 +173,8 @@ export function StickyNote({
     }
   }
 
+  const ink = inkFor(color);
+
   return (
     <motion.div
       ref={noteRef}
@@ -248,14 +204,14 @@ export function StickyNote({
           padding: noteInnerPadding(rant.text.length),
           // shorter rants get bigger text but fainter ink, so the big scrawls don't
           // read as heavy as a packed note - opacity tracks length via noteOpacity.
-          color: `color(from var(--color-text-sticky-note) srgb r g b / ${noteOpacity(rant.text.length)})`,
+          color: `color(from var(${ink}) srgb r g b / ${noteOpacity(rant.text.length)})`,
         }}>
         {rant.text}
       </p>
       <span
         className={styles.noteAuthor}
         style={{
-          color: `color(from var(--color-text-sticky-note) srgb r g b / ${noteAuthorOpacity(rant.text.length)})`,
+          color: `color(from var(${ink}) srgb r g b / ${noteAuthorOpacity(rant.text.length)})`,
         }}>
         {rant.name || "anon"}
       </span>

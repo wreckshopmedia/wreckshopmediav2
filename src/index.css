@@ -50,13 +50,14 @@ USE AS THEME FILE!
   /* ------------ STICKY NOTE COLORS ------------ */
   /* the 5-color cycle for rant sticky notes. ORDER = the color index stored in
   the DB, so keep exactly 5 and don't reorder casually. mix theme refs and new
-  hexes freely - e.g. --sticky-note-red references an existing theme color. */
+  hexes freely - e.g. --sticky-note-peach references an existing theme color. */
   --sticky-note-yellow: #fff988;
-  --sticky-note-red: var(--error-tomato); /* theme ref - works great, tweak away */
+  --sticky-note-red: #fe8471; /* lighter cousin of --error-tomato, easier to write on */
   --sticky-note-green: #b3efbd;
   --sticky-note-blue: #aef2fd;
   --sticky-note-peach: var(--light-apricot); /* v2, may replace??? */
   --color-text-sticky-note: #413B39; /* v2, lighter, pencil color */
+  --color-text-sticky-note-red: #2a1f1c; /* darker pencil so the red note stays readable */
 
   /* ----------------------------------------------- */
   /* ----------------------------------------------- */

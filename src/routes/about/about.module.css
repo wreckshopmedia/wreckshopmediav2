@@ -11,7 +11,7 @@
   left: 50%;
   bottom: calc(50% - 80px);
   translate: -50% 0;
-  width: clamp(300px, 50dvw, 570px);
+  width: clamp(300px, 51dvw, 580px);
   display: flex;
   flex-direction: column;
   gap: clamp(0.9em, calc(1dvw + 1dvh), 1.6em);
@@ -19,7 +19,7 @@
 
   p {
     font-weight: 300;
-    line-height: 1.35em;
+    line-height: 1.3em;
     color: var(--color-text-body);
     text-align: left;
     text-wrap: pretty;
@@ -31,6 +31,10 @@
 
     span.bizName {
       font-weight: 600;
+    }
+
+    span.boldSpan {
+      font-weight: 500;
     }
   }
 }

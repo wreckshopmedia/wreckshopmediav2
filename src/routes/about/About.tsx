@@ -51,21 +51,24 @@ export function About() {
 
       <div className={styles.bioStack}>
         <p>
-            <span className={styles.bizName}>Wreck Shop Media</span> was officially founded &
-            registered in 2022 by a nerdy dude who tried to trick people he was all rock and roll
-            and stuff. Chris "Mo" Mochinski was born in Minneapolis back in the 1900s, and was
-            irresponsibly obsessed with technology from day 3,492...like, around the end of
-            elementary school. By age 14, he was typing 80+ WPM (formally tested) before high
-            school. By age 17, Mo was building rudimentary websites for his band and others.
-          </p>
+          <span className={styles.bizName}>Wreck Shop Media</span> was officially founded &
+          registered in 2022 by a nerdy dude who tried to trick people he was all rock and roll and
+          stuff. <span className={styles.boldSpan}>Chris "Mo" Mochinski</span> was born in
+          Minneapolis, Minnesota way back in the 1900s, and was irresponsibly obsessed with
+          technology from day 3,492...like, around the end of elementary school. By age 14, he was
+          typing 80+ WPM consistently because it was one of many "weird talents" with which he was
+          obsessed (see also: breakdancing). By age 18, Mo was building rudimentary websites for his
+          band and others (OH HAI, GeoCities). It was all downhill from there.
+        </p>
         <p>
-            When Mo isn't tearing through code, you may catch him doing something musical, pursuing
-            his private pilot's license, or on an adventure with his stepkid. Please also note that
-            Mo is the worst basketball player of all time, he loves airports an unprecedented
-            amount, and he eats a single slice of peanut butter toast every night before he goes to
-            sleep...a thing he finds tragically boring and wouldn't do if his body didn't need it.
-            The sleep, not the toast.
-          </p>
+          When Mo isn't tearing through code, you might catch him onstage, in the studio working on
+          original music, up in the sky logging flight hours, automating something ridiculous, or on
+          an adventure with his stepkid. Please also note that Mo is the worst basketball player of
+          all time, he loves airports an unprecedented amount, and he eats a{" "}
+          <span className={styles.boldSpan}>single slice of peanut butter toast</span> every night
+          before he goes to sleep...a thing he finds tragically boring and wouldn't do if his body
+          didn't technically need it. The sleep, not the toast.
+        </p>
       </div>
     </>
   );

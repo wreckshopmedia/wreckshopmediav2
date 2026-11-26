@@ -19,11 +19,16 @@
 .note {
   container-type: inline-size;
   position: absolute;
-  /* locked square at any screen size; can shrink small (text goes unreadable, ok for now) */
-  width: clamp(80px, 16vw, 160px);
+  /* locked square. full 160px down to ~1000px wide / ~700px tall, then shrinks gently:
+     width-wise at half the old 16vw rate (8vw + 80px), height-wise only a little once
+     the screen gets short (14dvh + 62px). whichever axis is tighter wins, floor 100px */
+  --note-size: clamp(100px, min(8vw + 80px, 14dvh + 62px), 160px);
+  width: var(--note-size);
   aspect-ratio: 1;
-  padding-block: min(3cqi, 12px);
-  padding-inline: min(5cqi, 16px);
+  /* cqi on an element's OWN padding resolves against the container above it (the site
+     layout), not the note - so it always hit the px cap. scale off the note's width instead */
+  padding-block: calc(var(--note-size) * 0.075);
+  padding-inline: calc(var(--note-size) * 0.1);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -75,7 +80,10 @@
   left: 50%;
   top: 34%;
   translate: -50% 0;
-  width: clamp(150px, 20vw, 210px);
+  /* same idea as --note-size: full 210px down to ~1050px wide / ~700px tall, then half
+     the old 20vw shrink rate width-wise, a gentle dvh squeeze on short screens */
+  --pad-size: clamp(160px, min(10vw + 105px, 18dvh + 84px), 210px);
+  width: var(--pad-size);
   aspect-ratio: 1;
   rotate: -5deg;
   z-index: 30;
@@ -95,7 +103,9 @@
   container-type: inline-size;
   position: absolute;
   inset: 0;
-  padding: 0.7em 0.9em;
+  /* same width ratios as a placed .note so the pad previews the stuck result */
+  padding-block: calc(var(--pad-size) * 0.075);
+  padding-inline: calc(var(--pad-size) * 0.1);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;

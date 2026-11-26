@@ -66,27 +66,44 @@ export function seededLayout(id: string) {
 
 /* ------------ NOTE TEXT SIZING ------------ */
 /* shared by placed notes AND the compose pad, so what you type previews how the note
-   will look once it's stuck. TODO revisit font sizes when more done */
+   will look once it's stuck. one table so size, line-height and ink fade always step
+   together. no giant tier anymore - the top tier is the biggest text ever gets, and the
+   steps are small so a note doesn't shrink and then sit there half empty. */
+
+interface NoteTextTier {
+  /** inclusive max rant length for this tier */
+  maxLen: number;
+  fontSize: string;
+  lineHeight: string;
+  opacity: number;
+  /** inner padding on the text element - parked at 0, see noteInnerPadding */
+  padding: string;
+}
+
+const NOTE_TEXT_TIERS: readonly NoteTextTier[] = [
+  { maxLen: 28, fontSize: "21cqi", lineHeight: "1em", opacity: 0.8, padding: "0" },
+  { maxLen: 50, fontSize: "17cqi", lineHeight: "1em", opacity: 0.85, padding: "0" },
+  { maxLen: 80, fontSize: "14.5cqi", lineHeight: "1em", opacity: 0.9, padding: "0" },
+  { maxLen: 115, fontSize: "12.5cqi", lineHeight: "1em", opacity: 0.95, padding: "0" },
+  // smallest size new rants ever get - the pad caps input at 165 (MAX_RANT_LENGTH)
+  { maxLen: 165, fontSize: "11.5cqi", lineHeight: "1em", opacity: 1, padding: "0" },
+  // legacy only: rants posted back when the cap was 200, so they don't clip
+  { maxLen: Infinity, fontSize: "10cqi", lineHeight: "1.05em", opacity: 1, padding: "0" },
+];
+
+/** @description The sizing tier a rant of this length falls into. */
+function noteTextTier(len: number): NoteTextTier {
+  return NOTE_TEXT_TIERS.find((t) => len <= t.maxLen) ?? NOTE_TEXT_TIERS[NOTE_TEXT_TIERS.length - 1];
+}
 
 /** @description Picks a font-size for the note text based on rant length. */
 export function noteFontSize(len: number): string {
-  if (len <= 12) return "30cqi"; // super short - go big
-  if (len <= 30) return "21cqi";
-  if (len <= 80) return "13cqi";
-  if (len <= 140) return "11cqi";
-  return "9.5cqi";
+  return noteTextTier(len).fontSize;
 }
 
-/**
- * @description Note text opacity change based on rant length.
- * shorter text = more see-through
- */
+/** @description Note text opacity based on rant length - shorter, bigger text reads fainter. */
 export function noteOpacity(len: number): number {
-  if (len <= 12) return 0.7;
-  if (len <= 30) return 0.8;
-  if (len <= 80) return 0.9;
-  if (len <= 140) return 1;
-  return 1;
+  return noteTextTier(len).opacity;
 }
 
 // the author signature tracks the body-text opacity but sits this much fainter at every
@@ -100,23 +117,15 @@ export function noteAuthorOpacity(len: number): number {
 
 /** @description Picks a line-height for the note text based on rant length. */
 export function noteLineHeight(len: number): string {
-  if (len <= 12) return "0.9em";
-  if (len <= 30) return "1em";
-  if (len <= 80) return "1em";
-  if (len <= 140) return "1em";
-  return "1.125em";
+  return noteTextTier(len).lineHeight;
 }
 
 /**
  * @description Some typefaces are getting cut off on the edges. Larger = a little
  * padding, small = not needed. This is probably partially due to dynamic line
  * height. Note that this is INNER padding (on the text element itself).
- * > 🚗 PARKED, may need adjustments later but, for now, ret 0
+ * > 🚗 PARKED, may need adjustments later but, for now, every tier is 0
  */
 export function noteInnerPadding(len: number): string {
-  if (len <= 12) return "0";
-  if (len <= 30) return "0";
-  if (len <= 80) return "0";
-  if (len <= 140) return "0";
-  return "0";
+  return noteTextTier(len).padding;
 }

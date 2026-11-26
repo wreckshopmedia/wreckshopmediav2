@@ -11,7 +11,10 @@ import {
 } from "./stickyHelpers";
 import styles from "./stickyBoard.module.css";
 
-const MAX_RANT_LENGTH = 200;
+// past ~165 chars the text would have to shrink too small to read, so the pad just stops
+// taking input - got more to say? stick a second note. keep in sync with the server's
+// MAX_MESSAGE_LENGTH in wreckshopmediav2-server/src/validation.ts.
+const MAX_RANT_LENGTH = 165;
 const RANT_PLACEHOLDER = "scribble a rant...";
 
 interface ComposePadProps {
